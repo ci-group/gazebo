@@ -23,58 +23,58 @@
  * Date: 19 September 2006
  */
 
-#ifndef PTZINTERFACE_HH
-#define PTXINTERFACE_HH
+#ifndef ACTARRAYINTERFACE_HH
+#define ACTARRAYINTERFACE_HH
 
 #include "GazeboInterface.hh"
 
-// Forward declarations
-typedef struct gz_actarray gz_actarray_t;
 namespace gazebo
 {
-/// \addtogroup player_iface Interfaces
+/// \addtogroup player_iface
 /// \{
 /// \defgroup actarray_player Actarray Interface
 /// \brief Interface for controller an actuator array
 /// \{
 
-/// \brief Actarray interface
-class ActarrayInterface : public GazeboInterface
-{
-  /// \brief Constructor
-  public: ActarrayInterface(player_devaddr_t addr, GazeboDriver *driver,
-                              ConfigFile *cf, int section);
+  class ActArrayIface;
 
-  /// \brief Destructor
-  public: virtual ~ActarrayInterface();
-
-  /// \brief Handle all messages. This is called from GazeboDriver
-  public: virtual int ProcessMessage(QueuePointer &respQueue,
-                                     player_msghdr_t *hdr, void *data);
-
-  /// \brief Update this interface, publish new info.
-  public: virtual void Update();
-
-  /// \brief Open a SHM interface when a subscription is received. \
-  ///        This is called fromGazeboDriver::Subscribe
-  public: virtual void Subscribe();
-
-  /// \brief Close a SHM interface. This is called from \
-  ///        GazeboDriver::Unsubscribe
-  public: virtual void Unsubscribe();
-
-  private: gz_actarray_t *iface;
-
-  /// \brief Gazebo id. This needs to match and ID in a Gazebo WorldFile
-  private: char *gz_id;
-
-  /// \brief Timestamp on last data update
-  private: double datatime;
-};
-
-/// \} 
-/// \}
-
-
+  /// \brief Actarray interface
+  class ActarrayInterface : public GazeboInterface
+  {
+    /// \brief Constructor
+    public: ActarrayInterface( player_devaddr_t addr, GazeboDriver *driver,
+                               ConfigFile *cf, int section);
+  
+    /// \brief Destructor
+    public: virtual ~ActarrayInterface();
+  
+    /// \brief Handle all messages. This is called from GazeboDriver
+    public: virtual int ProcessMessage(QueuePointer &respQueue,
+                                       player_msghdr_t *hdr, void *data);
+  
+    /// \brief Update this interface, publish new info.
+    public: virtual void Update();
+  
+    /// \brief Open a SHM interface when a subscription is received. \
+    ///        This is called fromGazeboDriver::Subscribe
+    public: virtual void Subscribe();
+  
+    /// \brief Close a SHM interface. This is called from \
+    ///        GazeboDriver::Unsubscribe
+    public: virtual void Unsubscribe();
+  
+    private: ActarrayIface *iface;
+  
+    /// \brief Gazebo id. This needs to match and ID in a Gazebo WorldFile
+    private: char *gz_id;
+  
+    /// \brief Timestamp on last data update
+    private: double datatime;
+  };
+  
+  /// \} 
+  /// \}
+  
+  
 }
 #endif
