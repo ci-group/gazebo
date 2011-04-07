@@ -19,8 +19,7 @@
 #include "common/XMLConfig.hh"
 #include "common/GazeboError.hh"
 
-#include "physics/World.hh"
-#include "physics/PhysicsFactory.hh"
+#include "physics/Physics.hh"
 
 #include "transport/Transport.hh"
 
@@ -105,7 +104,6 @@ PhysicsServer::PhysicsServer()
   transport::init();
 
   physics::init();
-  //physics::PhysicsFactory::RegisterAll();
 }
 
 PhysicsServer::~PhysicsServer()
@@ -137,14 +135,14 @@ void PhysicsServer::Load( const std::string &filename )
 
   while(worldNode)
   {
-    physics::create_world("default");
-    //physics::World *world = new physics::World();
+    physics::WorldPtr world = physics::create_world("default");
+
     this->worlds.push_back(world);
 
     //Create the world
     try
     {
-      world->Load(worldNode);
+      physics::load_world(world, worldNode);
     }
     catch (common::GazeboError e)
     {
@@ -166,19 +164,16 @@ void PhysicsServer::Load( const std::string &filename )
 void PhysicsServer::Init()
 {
   for (int i=0; i < this->worlds.size(); i++)
-    this->worlds[i]->Init();
+    physics::init_world(this->worlds[i]);
 }
 
 void PhysicsServer::Run()
 {
   for (int i=0; i < this->worlds.size(); i++)
-    this->worlds[i]->Start();
+    physics::run_world(this->worlds[i]);
 
   while (!this->quit)
   {
-    /*for (int i=0; i < this->worlds.size(); i++)
-      this->worlds[i]->Update();
-      */
     usleep(1000000);
   }
 }
