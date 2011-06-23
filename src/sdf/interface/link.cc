@@ -40,7 +40,7 @@
 #include <algorithm>
 
 #include "common/Console.hh"
-#include "sdf/interface/link.hh"
+#include "sdf/interface/Link.hh"
 
 using namespace sdf;
 

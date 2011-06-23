@@ -17,10 +17,10 @@
 #include <string.h>
 
 #include "common/Exception.hh"
-#include "common/Matrix4.hh"
+#include "math/Matrix4.hh"
 
 using namespace gazebo;
-using namespace common;
+using namespace math;
 
 
 const Matrix4 Matrix4::IDENTITY(

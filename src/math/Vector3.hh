@@ -27,7 +27,7 @@
 
 namespace gazebo
 {
-	namespace common
+	namespace math
   {
   /// \addtogroup gazebo_server
   /// \brief Generic x,y,z vector 
@@ -167,7 +167,7 @@ namespace gazebo
     /// \param out Ostream
     /// \param pt Vector3 to output
     /// \return The Ostream
-    public: friend std::ostream &operator<<( std::ostream &out, const gazebo::common::Vector3 &pt )
+    public: friend std::ostream &operator<<( std::ostream &out, const gazebo::math::Vector3 &pt )
     {
       out << pt.x << " " << pt.y << " " << pt.z;
   
@@ -178,7 +178,7 @@ namespace gazebo
     /// \param in Ostream
     /// \param pt Vector3 to read values into
     /// \return The istream
-    public: friend std::istream &operator>>( std::istream &in, gazebo::common::Vector3 &pt )
+    public: friend std::istream &operator>>( std::istream &in, gazebo::math::Vector3 &pt )
     {
       // Skip white spaces
       in.setf( std::ios_base::skipws );

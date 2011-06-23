@@ -21,10 +21,10 @@
  */
 
 #include <math.h>
-#include "common/Angle.hh"
+#include "math/Angle.hh"
 
 using namespace gazebo;
-using namespace common;
+using namespace math;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Constructor

@@ -17,11 +17,11 @@
 #ifndef MATRIX3_HH
 #define MATRIX3_HH
 
-#include "common/Vector3.hh"
+#include "math/Vector3.hh"
 
 namespace gazebo
 {
-	namespace common
+	namespace math
   {
     class Matrix3
     {

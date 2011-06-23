@@ -24,12 +24,12 @@
 
 #include <iostream>
 
-#include "common/Vector3.hh"
-#include "common/Quatern.hh"
+#include "math/Vector3.hh"
+#include "math/Quatern.hh"
 
 namespace gazebo
 {
-	namespace common
+	namespace math
   {
   
     /// \addtogroup gazebo_server
@@ -131,12 +131,21 @@ namespace gazebo
       /// \param out Ostream
       /// \param pose Pose to output
       /// \return the Ostream
-      public: friend std::ostream &operator<<(std::ostream &out, const gazebo::common::Pose3d &pose)
+      public: friend std::ostream &operator<<(std::ostream &out, 
+                  const gazebo::math::Pose3d &pose)
               {
-                out << "Pos[" << pose.pos << "] Rot[" << pose.rot << "]";
+                out << pose.pos << " " << pose.rot;
                 return out;
-    
               }
+
+    public: friend std::istream &operator>>( std::istream &in, 
+                gazebo::math::Pose3d &pose )
+            {
+              // Skip white spaces
+              in.setf( std::ios_base::skipws );
+              in >> pose.pos >> pose.rot;
+              return in;
+            }
     };
     
     /// \}

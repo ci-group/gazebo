@@ -21,50 +21,50 @@
  */
 
 #include <math.h>
-#include "common/Vector2d.hh"
+#include "math/Vector2i.hh"
 
 using namespace gazebo;
-using namespace common;
+using namespace math;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constructor
-Vector2d::Vector2d()
+Vector2i::Vector2i()
   : x(0), y(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constructor
-Vector2d::Vector2d( const double &x, const double &y )
+Vector2i::Vector2i( const int &x, const int &y )
   : x(x), y(y)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Copy Constructor
-Vector2d::Vector2d( const Vector2d &pt )
+Vector2i::Vector2i( const Vector2i &pt )
   : x(pt.x), y(pt.y)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Destructor
-Vector2d::~Vector2d()
+Vector2i::~Vector2i()
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Calc distance to the given point
-double Vector2d::Distance(const Vector2d &pt ) const
+int Vector2i::Distance(const Vector2i &pt ) const
 {
   return sqrt((this->x-pt.x)*(this->x-pt.x) + (this->y-pt.y)*(this->y-pt.y));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Normalize the vector length
-void Vector2d::Normalize()
+void Vector2i::Normalize()
 {
-  double d = sqrt(this->x * this->x + this->y * this->y);
+  int d = sqrt(this->x * this->x + this->y * this->y);
 
   this->x /= d;
   this->y /= d;
@@ -72,7 +72,7 @@ void Vector2d::Normalize()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Set the contents of the vector
-void Vector2d::Set(double x, double y)
+void Vector2i::Set(int x, int y)
 {
   this->x = x;
   this->y = y;
@@ -81,7 +81,7 @@ void Vector2d::Set(double x, double y)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Equals operator
-const Vector2d &Vector2d::operator=( const Vector2d &pt )
+const Vector2i &Vector2i::operator=( const Vector2i &pt )
 {
   this->x = pt.x;
   this->y = pt.y;
@@ -91,7 +91,7 @@ const Vector2d &Vector2d::operator=( const Vector2d &pt )
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Equal operator
-const Vector2d &Vector2d::operator=( double value )
+const Vector2i &Vector2i::operator=( int value )
 {
   this->x = value;
   this->y = value; 
@@ -103,12 +103,12 @@ const Vector2d &Vector2d::operator=( double value )
 
 ////////////////////////////////////////////////////////////////////////////////
 // Addition operator
-Vector2d Vector2d::operator+( const Vector2d &pt ) const
+Vector2i Vector2i::operator+( const Vector2i &pt ) const
 {
-  return Vector2d(this->x + pt.x, this->y + pt.y);
+  return Vector2i(this->x + pt.x, this->y + pt.y);
 }
 
-const Vector2d &Vector2d::operator+=( const Vector2d &pt )
+const Vector2i &Vector2i::operator+=( const Vector2i &pt )
 {
   this->x += pt.x;
   this->y += pt.y;
@@ -118,12 +118,12 @@ const Vector2d &Vector2d::operator+=( const Vector2d &pt )
 
 ////////////////////////////////////////////////////////////////////////////////
 // Subtraction operators
-Vector2d Vector2d::operator-( const Vector2d &pt ) const
+Vector2i Vector2i::operator-( const Vector2i &pt ) const
 {
-  return Vector2d(this->x - pt.x, this->y - pt.y);
+  return Vector2i(this->x - pt.x, this->y - pt.y);
 }
 
-const Vector2d &Vector2d::operator-=( const Vector2d &pt )
+const Vector2i &Vector2i::operator-=( const Vector2i &pt )
 {
   this->x -= pt.x;
   this->y -= pt.y;
@@ -135,12 +135,12 @@ const Vector2d &Vector2d::operator-=( const Vector2d &pt )
 ////////////////////////////////////////////////////////////////////////////////
 // Division operators
 
-const Vector2d Vector2d::operator/( const Vector2d &pt ) const
+const Vector2i Vector2i::operator/( const Vector2i &pt ) const
 {
-  return Vector2d(this->x / pt.x, this->y / pt.y);
+  return Vector2i(this->x / pt.x, this->y / pt.y);
 }
 
-const Vector2d &Vector2d::operator/=( const Vector2d &pt )
+const Vector2i &Vector2i::operator/=( const Vector2i &pt )
 {
   this->x /= pt.x;
   this->y /= pt.y;
@@ -148,12 +148,12 @@ const Vector2d &Vector2d::operator/=( const Vector2d &pt )
   return *this;
 }
 
-const Vector2d Vector2d::operator/( double v ) const
+const Vector2i Vector2i::operator/( int v ) const
 {
-  return Vector2d(this->x / v, this->y / v);
+  return Vector2i(this->x / v, this->y / v);
 }
 
-const Vector2d &Vector2d::operator/=( double v )
+const Vector2i &Vector2i::operator/=( int v )
 {
   this->x /= v;
   this->y /= v;
@@ -165,12 +165,12 @@ const Vector2d &Vector2d::operator/=( double v )
 
 ////////////////////////////////////////////////////////////////////////////////
 // Mulitplication operators
-const Vector2d Vector2d::operator*( const Vector2d &pt ) const
+const Vector2i Vector2i::operator*( const Vector2i &pt ) const
 {
-  return Vector2d(this->x * pt.x, this->y * pt.y);
+  return Vector2i(this->x * pt.x, this->y * pt.y);
 }
 
-const Vector2d &Vector2d::operator*=( const Vector2d &pt )
+const Vector2i &Vector2i::operator*=( const Vector2i &pt )
 {
   this->x *= pt.x;
   this->y *= pt.y;
@@ -178,12 +178,12 @@ const Vector2d &Vector2d::operator*=( const Vector2d &pt )
   return *this;
 }
 
-const Vector2d Vector2d::operator*( double v ) const
+const Vector2i Vector2i::operator*( int v ) const
 {
-  return Vector2d(this->x * v, this->y * v);
+  return Vector2i(this->x * v, this->y * v);
 }
 
-const Vector2d &Vector2d::operator*=( double v)
+const Vector2i &Vector2i::operator*=( int v)
 {
   this->x *= v;
   this->y *= v;
@@ -193,21 +193,21 @@ const Vector2d &Vector2d::operator*=( double v)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Equality operator
-bool Vector2d::operator==( const Vector2d &pt ) const
+bool Vector2i::operator==( const Vector2i &pt ) const
 {
   return this->x == pt.x && this->y == pt.y;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Inequality operator
-bool Vector2d::IsFinite() const
+bool Vector2i::IsFinite() const
 {
   return finite(this->x) && finite(this->y);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// [] operator
-double Vector2d::operator[](unsigned int index) const
+int Vector2i::operator[](unsigned int index) const
 {
   switch (index)
   {

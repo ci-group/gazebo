@@ -14,10 +14,10 @@
  * limitations under the License.
  *
 */
-#include "common/Plane.hh"
+#include "math/Plane.hh"
 
 using namespace gazebo;
-using namespace common;
+using namespace math;
 
 
 Plane::Plane()

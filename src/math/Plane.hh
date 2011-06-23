@@ -17,12 +17,12 @@
 #ifndef PLANE_HH
 #define PLANE_HH
 
-#include "common/Vector3.hh"
-#include "common/Vector2d.hh"
+#include "math/Vector3.hh"
+#include "math/Vector2d.hh"
 
 namespace gazebo
 {
-	namespace common
+	namespace math
   {
     class Plane
     {

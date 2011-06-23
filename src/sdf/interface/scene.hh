@@ -41,28 +41,39 @@
 #include <boost/shared_ptr.hpp>
 #include <iostream>
 
+#include "common/Color.hh"
 #include "sdf/interface/Param.hh"
-#include "sdf/interface/color.hh"
 
 namespace sdf
 {
   class Scene
   {
-    public: Scene() : ambientColor("rgba", Color()),
-            backgroundColor("rgba",Color()),
+    public: Scene() : ambientColor("rgba", gazebo::common::Color()),
+            backgroundColor("rgba", gazebo::common::Color()),
             skyMaterial("material",""),
             shadowEnabled("enabled",true),
-            shadowColor("rgba",Color()),
-            shadowType("type","")
+            shadowColor("rgba", gazebo::common::Color()),
+            shadowType("type",""),
+            fogColor("rgba", gazebo::common::Color()),
+            fogType("type","linear"),
+            fogStart("start",1.0),
+            fogEnd("end",100.0),
+            fogDensity("density",1.0)
     { this->Clear(); }
   
-    public: ParamT<Color, true> ambientColor;
-    public: ParamT<Color, true> backgroundColor;
+    public: ParamT<gazebo::common::Color, true> ambientColor;
+    public: ParamT<gazebo::common::Color, true> backgroundColor;
     public: ParamT<std::string, false> skyMaterial;
 
     public: ParamT<bool, false> shadowEnabled;
-    public: ParamT<Color, false> shadowColor;
+    public: ParamT<gazebo::common::Color, false> shadowColor;
     public: ParamT<std::string, false> shadowType;
+
+    public: ParamT<gazebo::common::Color, false> fogColor;
+    public: ParamT<std::string, false> fogType;
+    public: ParamT<double, false> fogStart;
+    public: ParamT<double, false> fogEnd;
+    public: ParamT<double, false> fogDensity;
   
     public: void Clear()
     {
@@ -72,6 +83,11 @@ namespace sdf
       this->shadowEnabled.Reset();
       this->shadowColor.Reset();
       this->shadowType.Reset();
+      this->fogColor;
+      this->fogType;
+      this->fogStart;
+      this->fogEnd;
+      this->fogDensity;
     }
 
     public: void Print( const std::string _prefix)

@@ -22,10 +22,10 @@
 
 #include <math.h>
 
-#include "common/Vector4.hh"
+#include "math/Vector4.hh"
 
 using namespace gazebo;
-using namespace common;
+using namespace math;
 
 
 ////////////////////////////////////////////////////////////////////////////////

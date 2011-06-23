@@ -43,11 +43,11 @@
 #include <iostream>
 
 #include "sdf/interface/Param.hh"
-#include "sdf/interface/plugin.hh"
-#include "sdf/interface/scene.hh"
-#include "sdf/interface/physics.hh"
-#include "sdf/interface/model.hh"
-#include "sdf/interface/joint.hh"
+#include "sdf/interface/Plugin.hh"
+#include "sdf/interface/Scene.hh"
+#include "sdf/interface/Physics.hh"
+#include "sdf/interface/Model.hh"
+#include "sdf/interface/Joint.hh"
 
 namespace sdf
 {

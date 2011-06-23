@@ -18,11 +18,11 @@
 #define BOX_HH
 
 #include <iostream>
-#include "common/Vector3.hh"
+#include "math/Vector3.hh"
 
 namespace gazebo
 {
-  namespace common
+  namespace math
   {
     class Box
     {
@@ -57,7 +57,7 @@ namespace gazebo
 
       public: const Box &operator+=( const Box &b );
 
-      public: friend std::ostream &operator<<( std::ostream &out, const gazebo::common::Box &b )
+      public: friend std::ostream &operator<<( std::ostream &out, const gazebo::math::Box &b )
       {
         out << "Min[" << b.min << "] Max[" << b.max << "]";
 

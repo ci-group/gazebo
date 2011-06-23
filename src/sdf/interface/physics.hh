@@ -42,8 +42,7 @@
 #include <iostream>
 
 #include "sdf/interface/Param.hh"
-#include "sdf/interface/color.hh"
-#include "sdf/interface/pose.hh"
+#include "math/Vector3.hh"
 
 namespace sdf
 {
@@ -99,11 +98,11 @@ namespace sdf
  
   class Physics
   {
-    public: Physics() : type("type", "ode"), gravity("xyz",Vector3()) 
+    public: Physics() : type("type", "ode"), gravity("xyz",gazebo::math::Vector3()) 
             { this->Clear(); };
   
     public: ParamT<std::string, true> type;
-    public: ParamT<Vector3, false> gravity;
+    public: ParamT<gazebo::math::Vector3, false> gravity;
 
     public: boost::shared_ptr<PhysicsEngine> engine;
 

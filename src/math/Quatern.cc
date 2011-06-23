@@ -19,10 +19,10 @@
  * Date: 03 Apr 2007
  */
 #include <math.h>
-#include "common/Quatern.hh"
+#include "math/Quatern.hh"
 
 using namespace gazebo;
-using namespace common;
+using namespace math;
 
 
 ////////////////////////////////////////////////////////////////////////////////

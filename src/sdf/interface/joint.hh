@@ -43,7 +43,7 @@
 #include <iostream>
 
 #include "sdf/interface/Param.hh"
-#include "sdf/interface/pose.hh"
+#include "math/Pose3d.hh"
 
 namespace sdf
 {
@@ -92,9 +92,11 @@ namespace sdf
               UNKNOWN, REVOLUTE, REVOLUTE2, PRISMATIC, PISTON, BALL, UNIVERSAL
             } typeEnum;
 
-    public: Joint() : name("name",""), type("type",""), axis("axis",Vector3()), 
-            axis2("axis2", Vector3()), childLinkName("link", ""), 
-            parentLinkName("link", ""), origin("origin", Pose())
+    public: Joint() : name("name",""), type("type",""), 
+            axis("axis",gazebo::math::Vector3()), 
+            axis2("axis2", gazebo::math::Vector3()), 
+            childLinkName("link", ""), 
+            parentLinkName("link", ""), origin("origin", gazebo::math::Pose3d())
     { this->Clear(); };
 
     public: ParamT<std::string,true> name;
@@ -109,8 +111,8 @@ namespace sdf
     ///            PISTON     N/A
     ///            BALL       N/A
     ///            UNIVERSAL  N/A
-    public: ParamT<Vector3, false> axis;
-    public: ParamT<Vector3, false> axis2;
+    public: ParamT<gazebo::math::Vector3, false> axis;
+    public: ParamT<gazebo::math::Vector3, false> axis2;
 
     /// child Link element
     ///   child link frame is the same as the Joint frame
@@ -121,7 +123,7 @@ namespace sdf
     public: ParamT<std::string, true> parentLinkName;
 
     /// transform from Child Link frame to Joint frame
-    public: ParamT<Pose, true> origin;
+    public: ParamT<gazebo::math::Pose3d, true> origin;
 
     /// Joint Dynamics
     public: boost::shared_ptr<JointDynamics> dynamics;
@@ -152,7 +154,6 @@ namespace sdf
 
 
   };
-
 }
 
 #endif

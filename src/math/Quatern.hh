@@ -27,12 +27,12 @@
 #include <math.h> 
 #include <cmath> 
 
-#include "common/Angle.hh"
-#include "common/Vector3.hh"
+#include "math/Angle.hh"
+#include "math/Vector3.hh"
 
 namespace gazebo
 {
-	namespace common
+	namespace math
   {
   
   /// \addtogroup gazebo_server
@@ -183,7 +183,7 @@ namespace gazebo
     /// \param out Ostream
     /// \param q Quatern to output
     /// \return The ostream
-    public: friend  std::ostream &operator<<( std::ostream &out, const gazebo::common::Quatern &q )
+    public: friend  std::ostream &operator<<( std::ostream &out, const gazebo::math::Quatern &q )
     {
       Vector3 v = const_cast<Quatern*>(&q)->GetAsEuler();
       v.x = v.x * 180.0 / M_PI;
@@ -206,7 +206,7 @@ namespace gazebo
     /// \param in Ostream
     /// \param q Quatern to read values into
     /// \return The istream
-    public: friend std::istream &operator>>( std::istream &in, gazebo::common::Quatern &q )
+    public: friend std::istream &operator>>( std::istream &in, gazebo::math::Quatern &q )
     {
       Angle r, p, y;
   

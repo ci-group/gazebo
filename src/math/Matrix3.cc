@@ -17,11 +17,10 @@
 #include <string.h>
 
 #include "common/Exception.hh"
-#include "common/Matrix3.hh"
+#include "math/Matrix3.hh"
 
 using namespace gazebo;
-using namespace common;
-
+using namespace math;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constructor

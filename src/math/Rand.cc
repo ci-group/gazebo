@@ -21,10 +21,10 @@
  */
 
 #include <ctime>
-#include "common/Rand.hh"
+#include "math/Rand.hh"
 
 using namespace gazebo;
-using namespace common;
+using namespace math;
 
 
 GeneratorType *Rand::randGenerator = new GeneratorType(std::time(0));

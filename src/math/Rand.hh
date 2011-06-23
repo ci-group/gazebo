@@ -27,7 +27,7 @@
 
 namespace gazebo
 {
-	namespace common
+	namespace math
 {
 
   typedef boost::mt19937 GeneratorType;

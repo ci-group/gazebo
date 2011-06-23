@@ -15,10 +15,10 @@
  *
 */
 #include <math.h>
-#include "common/Box.hh"
+#include "math/Box.hh"
 
 using namespace gazebo;
-using namespace common;
+using namespace math;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Default constructor

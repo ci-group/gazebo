@@ -44,8 +44,8 @@
 
 
 #include "sdf/interface/Param.hh"
-#include "sdf/interface/plugin.hh"
-#include "sdf/interface/link.hh"
+#include "sdf/interface/Plugin.hh"
+#include "sdf/interface/Link.hh"
 
 namespace sdf
 {

@@ -44,8 +44,8 @@
 #include <iostream>
 
 #include "sdf/interface/Param.hh"
-#include "sdf/interface/plugin.hh"
-#include "sdf/interface/pose.hh"
+#include "sdf/interface/Plugin.hh"
+#include "math/Pose3d.hh"
 
 namespace sdf
 {
@@ -60,7 +60,7 @@ namespace sdf
   {
     public: Sensor() : name("name",""), type("type",""), 
             alwaysOn("always_on", false), updateRate("update_rate",10.0),
-            origin("origin", Pose())
+            origin("origin", gazebo::math::Pose3d())
     { this->Clear(); };
   
     public: ParamT<std::string, true> name;
@@ -68,7 +68,7 @@ namespace sdf
     public: ParamT<bool, false> alwaysOn;
     public: ParamT<double, true> updateRate;
   
-    public: ParamT<Pose, true> origin;
+    public: ParamT<gazebo::math::Pose3d, true> origin;
   
     public: boost::shared_ptr<SensorType> sensorType;
 

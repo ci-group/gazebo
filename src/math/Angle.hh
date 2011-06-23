@@ -36,7 +36,7 @@
 
 namespace gazebo
 {
-  namespace common
+  namespace math
   {
 
   /// \addtogroup gazebo_server
@@ -114,7 +114,7 @@ namespace gazebo
     /// \param out Ostream
     /// \param pt Angle to output
     /// \return The Ostream
-    public: friend std::ostream &operator<<( std::ostream &out, const gazebo::common::Angle &a )
+    public: friend std::ostream &operator<<( std::ostream &out, const gazebo::math::Angle &a )
     {
       out << a.GetAsDegree();
       return out;
@@ -124,7 +124,7 @@ namespace gazebo
     /// \param in Ostream
     /// \param pt Angle to read value into
     /// \return The istream
-    public: friend std::istream &operator>>( std::istream &in, gazebo::common::Angle &a )
+    public: friend std::istream &operator>>( std::istream &in, gazebo::math::Angle &a )
     {
       // Skip white spaces
       in.setf( std::ios_base::skipws );

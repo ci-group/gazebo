@@ -37,7 +37,7 @@
 #include <boost/algorithm/string.hpp>
 #include <vector>
 
-#include "sdf/interface/model.hh"
+#include "sdf/interface/Model.hh"
 
 using namespace sdf;
 
