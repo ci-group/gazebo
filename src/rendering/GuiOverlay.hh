@@ -2,24 +2,30 @@
 #define GUI_OVERLAY
 
 
+namespace Ogre
+{
+  class RenderTarget;
+}
+
 namespace CEGUI
 {
-  class OgreCEGuiRenderer;
+  class OgreRenderer;
+  class Window;
 }
 
 namespace gazebo
 {
   namespace rendering
   {
-    class GuiOverlay
+    class GUIOverlay
     {
-      public: GuiOverlay();
-      public: virtual ~GuiOverlay();
+      public: GUIOverlay();
+      public: virtual ~GUIOverlay();
 
-      public: void Init( Ogre::RenderWindow *_renderWindow );
+      public: void Init( Ogre::RenderTarget *_renderTarget );
 
-      private: CEGUI::OgreCEGUIRenderer *guiRenderer;
-      private: CEGUI::System *guiSystem;
+      private: CEGUI::OgreRenderer *guiRenderer;
+      private: CEGUI::Window *rootWindow;
     };
   }
 }
