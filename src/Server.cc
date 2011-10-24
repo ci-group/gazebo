@@ -1,189 +1,135 @@
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <errno.h>
+#include <iostream>
+#include <boost/interprocess/sync/interprocess_semaphore.hpp>
 
-#include "common/Timer.hh"
-#include "common/Exception.hh"
-#include "common/Plugin.hh"
-
-#include "sdf/sdf.h"
-#include "sdf/sdf_parser.h"
-
-#include "sensors/Sensors.hh"
-
-#include "physics/Physics.hh"
-#include "physics/World.hh"
-#include "physics/Base.hh"
-
-#include "gazebo.h"
-#include "Master.hh"
+#include "gazebo_config.h"
+#include "common/CommonTypes.hh"
+#include "rendering/Rendering.hh"
+#include "common/SystemPaths.hh"
 #include "Server.hh"
 
-using namespace gazebo;
+gazebo::Server *server = NULL;
 
+std::string config_filename = "";
+gazebo::common::StrStr_M params;
+std::vector<std::string> plugins;
 
-Server::Server()
+boost::interprocess::interprocess_semaphore sem(0);
+
+////////////////////////////////////////////////////////////////////////////////
+// TODO: Implement these options
+void PrintUsage()
 {
-  this->stop = false;
+  std::cerr << "Usage: gzserver\n";
 }
 
-Server::~Server()
+////////////////////////////////////////////////////////////////////////////////
+// Print the version/licence string
+void PrintVersion()
 {
-  delete this->master;
+  fprintf(stderr, "%s", GAZEBO_VERSION_HEADER);
 }
 
-void Server::LoadPlugin(const std::string &_filename)
+////////////////////////////////////////////////////////////////////////////////
+// Parse the argument list.  Options are placed in static variables.
+int ParseArgs(int argc, char **argv)
 {
-  gazebo::ServerPluginPtr plugin = gazebo::ServerPlugin::Create(_filename, _filename);
-  this->plugins.push_back(plugin);
-}
+  //FILE *tmpFile;
+  int ch;
 
-bool Server::Load(const std::string &_filename)
-{
-  std::string host = "";
-  unsigned short port = 0;
-
-  gazebo::transport::get_master_uri(host,port);
-
-  this->master = new gazebo::Master();
-  this->master->Init(port);
-  this->master->Run();
-
-
-  for (std::vector<gazebo::ServerPluginPtr>::iterator iter = this->plugins.begin(); iter != this->plugins.end(); iter++)
+  char *flags = (char*)("up:");
+  // Get letter options
+  while ((ch = getopt(argc, argv, flags)) != -1)
   {
-    (*iter)->Load();
-  }
-
-
-  // Load the world file
-  sdf::SDFPtr sdf(new sdf::SDF);
-  if (!sdf::init(sdf))
-  {
-    gzerr << "Unable to initialize sdf\n";
-    return false;
-  }
-
-  if (!sdf::readFile(_filename, sdf))
-  {
-    gzerr << "Unable to read sdf file[" << _filename << "]\n";
-    return false;
-  }
-
-  // Load gazebo
-  gazebo::load();
-
-  /// Load the sensors library
-  sensors::load();
-
-  /// Load the physics library
-  physics::load();
-
-  sdf::ElementPtr worldElem = sdf->root->GetElement("world");
-  while(worldElem)
-  {
-    physics::WorldPtr world = physics::create_world();
-
-    //Create the world
-    try
+    switch (ch)
     {
-      physics::load_world(world, worldElem);
-    }
-    catch (common::Exception e)
-    {
-      gzthrow("Failed to load the World\n"  << e);
-    }
+      case 'p':
+        {
+          if (optarg != NULL)
+            plugins.push_back( std::string(optarg) );
+          else
+            gzerr << "Missing plugin filename with -p argument\n";
+          break;
+        }
 
-    worldElem = sdf->root->GetNextElement("world", worldElem);
-  }
-
-  return true;
-}
-
-void Server::Init()
-{
-  sensors::init();
-
-  physics::init_worlds();
-  this->stop = false;
-}
-
-void Server::Stop()
-{
-  this->stop = true;
-}
-
-void Server::Fini()
-{
-  this->Stop();
-
-  gazebo::fini();
-
-  physics::fini();
-  sensors::fini();
-
-  if (this->master)
-    this->master->Fini();
-  delete this->master;
-  this->master = NULL;
-}
-
-void Server::Run()
-{
-
-  // Run the gazebo, starts a new thread
-  gazebo::run();
-
-  // Run each world. Each world starts a new thread
-  physics::run_worlds();
-
-  // Update the sensors.
-  while (!this->stop)
-  {
-    sensors::run_once(true);
-    usleep(10000);
-  }
-
-  // Stop all the worlds
-  physics::stop_worlds();
-
-  sensors::stop();
-
-  // Stop gazebo
-  gazebo::stop();
-
-  // Stop the master 
-  this->master->Stop();
-}
-
-void Server::SetParams( const common::StrStr_M &params )
-{
-  common::StrStr_M::const_iterator iter;
-  for (iter = params.begin(); iter != params.end(); iter++)
-  {
-    if (iter->first == "pause")
-    {
-      bool p = false;
-      try
-      {
-        p = boost::lexical_cast<bool>(iter->second);
-      }
-      catch (...)
-      {
-        // Unable to convert via lexical_cast, so try "true/false" string
-        std::string str = iter->second;
-        boost::to_lower(str);
-
-        if (str == "true")
-          p = true;
-        else if (str == "false")
-          p = false;
-        else
-          gzerr << "Invalid param value[" << iter->first << ":" 
-                << iter->second << "]\n";
-      }
-
-      physics::pause_worlds(p);
+      case 'u':
+        params["pause"] = "true";
+        break;
+      default:
+        PrintUsage();
+        return -1;
     }
   }
+
+  argc -= optind;
+  argv += optind;
+
+  // Get the world file name
+  if (argc >= 1)
+    config_filename = argv[0];
+
+  return 0;
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+// sighandler to shut everything down properly
+void SignalHandler( int )
+{
+  server->Stop();
+}
+
+int main(int argc, char **argv)
+{
+#ifdef BUILD_TYPE_PROFILE
+  HeapLeakChecker heapChecker("gzserver_check");
+#endif
+
+  //Application Setup
+  if (ParseArgs(argc, argv) != 0)
+    return -1;
+
+  PrintVersion();
+
+  if (signal(SIGINT, SignalHandler) == SIG_ERR)
+  {
+    std::cerr << "signal(2) failed while setting up for SIGINT" << std::endl;
+    return -1;
+  }
+
+  server = new gazebo::Server();
+  if (config_filename.empty())
+  {
+    printf("Error: no world filename specified on the command line\n");
+    return -1;
+  }
+
+  // Construct plugins
+  /// Load all the plugins specified on the command line
+  for (std::vector<std::string>::iterator iter = plugins.begin(); 
+       iter != plugins.end(); iter++)
+  {
+    server->LoadPlugin(*iter);
+  }
+
+  server->Load(config_filename);
+
+  server->SetParams( params );
+  server->Init();
+
+  server->Run();
+
+  server->Fini();
+
+  delete server;
+  server = NULL;
+  
+#ifdef BUILD_TYPE_PROFILE
+  if (!heapChecker.NoLeaks())
+    assert (NULL == "heap memory leak");
+#endif
+  return 0;
+}
