@@ -1,211 +1,121 @@
-/*********************************************************************
- * Software License Agreement (BSD License)
+/*
+ * Copyright 2011 Nate Koenig & Andrew Howard
  *
- *  Copyright (c) 2008, Willow Garage, Inc.
- *  All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
- *   * Neither the name of the Willow Garage nor the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
- *********************************************************************/
+*/
 
-// Original version: Melonee Wise <mwise@willowgarage.com>
-
-#include <tinyxml.h>
-#include "common/Pid.hh"
-#include "math/gzmath.h"
+#include <math.h>
+#include <stdio.h>
+#include "PID.hh"
 
 using namespace gazebo;
 using namespace common;
 
-Pid::Pid(double P, double I, double D, double I1, double I2)
-  : p_gain_(P), i_gain_(I), d_gain_(D), i_max_(I1), i_min_(I2)
+/////////////////////////////////////////////////
+PID::PID(double _p, double _i, double _d, double _imax, double _imin)
+  : pGain(_p), iGain(_i), dGain(_d), iMax(_imax), iMin(_imin)
 {
-  p_error_last_ = 0.0;
-  p_error_ = 0.0;
-  d_error_ = 0.0;
-  i_error_ = 0.0;
-  cmd_ = 0.0;
+  this->Reset();
 }
 
-Pid::~Pid()
+/////////////////////////////////////////////////
+PID::~PID()
 {
 }
 
-void Pid::initPid(double P, double I, double D, double I1, double I2)
+/////////////////////////////////////////////////
+void PID::Init(double _p, double _i, double _d, double _imax, double _imin)
 {
-  p_gain_ = P;
-  i_gain_ = I;
-  d_gain_ = D;
-  i_max_ = I1;
-  i_min_ = I2;
+  this->pGain = _p;
+  this->iGain = _i;
+  this->dGain = _d;
+  this->iMax = _imax;
+  this->iMin = _imin;
 
-  reset();
+  this->Reset();
 }
 
-void Pid::reset()
+/////////////////////////////////////////////////
+void PID::Reset()
 {
-  p_error_last_ = 0.0;
-  p_error_ = 0.0;
-  d_error_ = 0.0;
-  i_error_ = 0.0;
-  cmd_ = 0.0;
+  this->pErrLast = 0.0;
+  this->pErr = 0.0;
+  this->iErr = 0.0;
+  this->dErr = 0.0;
+  this->cmd = 0.0;
 }
 
-void Pid::getGains(double &p, double &i, double &d, double &i_max,
-                   double &i_min)
+/////////////////////////////////////////////////
+double PID::Update(double _error, common::Time _dt)
 {
-  p = p_gain_;
-  i = i_gain_;
-  d = d_gain_;
-  i_max = i_max_;
-  i_min = i_min_;
+   double pTerm, dTerm, iTerm;
+   this->pErr = _error; //this is pError = pState-pTarget
+ 
+   if (_dt == common::Time(0,0) || isnan(_error) || isinf(_error))
+     return 0.0;
+ 
+   // Calculate proportional contribution to command
+   pTerm = this->pGain * this->pErr;
+ 
+   // Calculate the integral error
+   this->iErr = this->iErr + _dt.Double() * this->pErr;
+ 
+   //Calculate integral contribution to command
+   iTerm = this->iGain * this->iErr;
+ 
+   // Limit iTerm so that the limit is meaningful in the output
+   if (iTerm > this->iMax)
+   {
+     iTerm = this->iMax;
+     this->iErr = iTerm / this->iGain;
+   }
+   else if (iTerm < this->iMin)
+   {
+     iTerm = this->iMin;
+     this->iErr = iTerm / this->iGain;
+   }
+ 
+   // Calculate the derivative error
+   if (_dt != common::Time(0, 0))
+   {
+     this->dErr = (this->pErr - this->pErrLast) / _dt.Double();
+     this->pErrLast = this->pErr;
+   }
+
+   // Calculate derivative contribution to command
+   dTerm = this->dGain * this->dErr;
+   this->cmd = -pTerm - iTerm - dTerm;
+ 
+   return this->cmd;
 }
 
-void Pid::setGains(double P, double I, double D, double I1, double I2)
+/////////////////////////////////////////////////
+void PID::SetCmd(double _cmd)
 {
-  p_gain_ = P;
-  i_gain_ = I;
-  d_gain_ = D;
-  i_max_ = I1;
-  i_min_ = I2;
+  this->cmd = _cmd;
 }
 
-bool Pid::initXml(TiXmlElement *config)
+/////////////////////////////////////////////////
+double PID::GetCmd()
 {
-  p_gain_ = config->Attribute("p") ? atof(config->Attribute("p")) : 0.0;
-  i_gain_ = config->Attribute("i") ? atof(config->Attribute("i")) : 0.0;
-  d_gain_ = config->Attribute("d") ? atof(config->Attribute("d")) : 0.0;
-  i_max_ = config->Attribute("iClamp") ?
-           atof(config->Attribute("iClamp")) : 0.0;
-  i_min_ = -i_max_;
-
-  reset();
-  return true;
+  return this->cmd;
 }
 
-double Pid::updatePid(double error, Time dt)
+/////////////////////////////////////////////////
+void PID::GetErrors(double &_pe, double &_ie, double &_de)
 {
-  double p_term, d_term, i_term;
-  p_error_ = error;  // this is pError = pState-pTarget
-
-  if (dt == Time(0.0) || isnan(error) || isinf(error))
-    return 0.0;
-
-  // Calculate proportional contribution to command
-  p_term = p_gain_ * p_error_;
-
-  // Calculate the integral error
-  i_error_ = i_error_ + dt.Double() * p_error_;
-
-  // Calculate integral contribution to command
-  i_term = i_gain_ * i_error_;
-
-  // Limit i_term so that the limit is meaningful in the output
-  if (i_term > i_max_)
-  {
-    i_term = i_max_;
-    i_error_ = i_term/i_gain_;
-  }
-  else if (i_term < i_min_)
-  {
-    i_term = i_min_;
-    i_error_ = i_term/i_gain_;
-  }
-
-  // Calculate the derivative error
-  if (dt.Double() != 0)
-  {
-    d_error_ = (p_error_ - p_error_last_) / dt.Double();
-    p_error_last_ = p_error_;
-  }
-  // Calculate derivative contribution to command
-  d_term = d_gain_ * d_error_;
-  cmd_ = -p_term - i_term - d_term;
-
-  return cmd_;
+  _pe = this->pErr;
+  _ie = this->iErr;
+  _de = this->dErr;
 }
-
-
-double Pid::updatePid(double error, double error_dot, Time dt)
-{
-  double p_term, d_term, i_term;
-  p_error_ = error;  // this is pError = pState-pTarget
-  d_error_ = error_dot;
-
-  if (dt == Time(0.0) || isnan(error) || isinf(error)
-                      || isnan(error_dot) || isinf(error_dot))
-    return 0.0;
-
-
-  // Calculate proportional contribution to command
-  p_term = p_gain_ * p_error_;
-
-  // Calculate the integral error
-  i_error_ = i_error_ + dt.Double() * p_error_;
-
-  // Calculate integral contribution to command
-  i_term = i_gain_ * i_error_;
-
-  // Limit i_term so that the limit is meaningful in the output
-  if (i_term > i_max_)
-  {
-    i_term = i_max_;
-    i_error_ = i_term/i_gain_;
-  }
-  else if (i_term < i_min_)
-  {
-    i_term = i_min_;
-    i_error_ = i_term/i_gain_;
-  }
-
-  // Calculate derivative contribution to command
-  d_term = d_gain_ * d_error_;
-  cmd_ = -p_term - i_term - d_term;
-
-  return cmd_;
-}
-
-
-
-void Pid::setCurrentCmd(double cmd)
-{
-  cmd_ = cmd;
-}
-
-double Pid::getCurrentCmd()
-{
-  return cmd_;
-}
-
-void Pid::getCurrentPIDErrors(double *pe, double *ie, double *de)
-{
-  *pe = p_error_;
-  *ie = i_error_;
-  *de = d_error_;
-}
-
-
