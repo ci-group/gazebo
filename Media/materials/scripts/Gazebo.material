@@ -1,4 +1,4 @@
-import * from "shadow_receiver.program"
+import * from "grid.material"
 
 vertex_program Gazebo/DepthMapVS glsl
 {
@@ -128,14 +128,13 @@ material Gazebo/LaserScan2nd
 
 material Gazebo/Grey
 {
-  receive_shadows on
   technique
   {
-    pass
+    pass main
     {
       ambient .1 .1 .1  1.0
       diffuse .5 .5 .5  1.0
-      specular 0.1 0.1 0.1 1.000000 12.500000
+      specular 0.01 0.01 0.01 1.000000 1.500000
     }
   }
 }
@@ -194,6 +193,9 @@ material Gazebo/Red
 	{
 		pass ambient
 		{
+      depth_check off
+      depth_write off
+
 			ambient 1 0 0 
       diffuse 1 0 0
       specular 0.1 0.1 0.1 1 1
@@ -207,6 +209,10 @@ material Gazebo/Green
 	{
 		pass ambient
 		{
+      depth_check off
+      depth_write off
+
+
 			ambient 0 1 0
       diffuse 0 1 0
       specular 0.1 0.1 0.1 1 1
@@ -220,6 +226,10 @@ material Gazebo/Blue
 	{
     pass ambient
     {
+      depth_check off
+      depth_write off
+
+
 			ambient 0 0 1
       diffuse 0 0 1
       specular 0.1 0.1 0.1 1 1
@@ -233,9 +243,9 @@ material Gazebo/Yellow
 	{
 		pass ambient
 		{
-			ambient 1 1 0
-      diffuse 1 1 0
-      specular 0.1 0.1 0.1 1 1
+			ambient 1 1 0 1
+      diffuse 1 1 0 1
+      specular 0 0 0 0 0
     }
 	}
 }
@@ -286,7 +296,7 @@ material Gazebo/RedGlow
     {
       ambient 1 0 0
       diffuse 1 0 0
-      emmissive 1 0 0
+      emissive 1 0 0
 			specular 0 0 0 128 
     }
 
@@ -481,7 +491,6 @@ material Gazebo/YellowTransparent
         colour_op_ex source1 src_current src_current 0 1 0
         alpha_op_ex source1 src_manual src_current 0.4
       }
-
     }
   }
 }
@@ -709,6 +718,23 @@ material Gazebo/Gold
 	}
 }
 
+material Gazebo/GreyGradientSky
+{
+	technique
+	{
+		pass
+		{
+			depth_write off
+      lighting off
+
+			texture_unit
+			{
+				texture grey_gradient.jpg
+			}
+		}
+	}
+}
+
 material Gazebo/CloudySky
 {
 	technique
@@ -735,7 +761,7 @@ material Gazebo/WoodPallet
 		{
 			ambient 0.5 0.5 0.5 1.0
 			diffuse 1.0 1.0 1.0 1.0
-			specular 0.0 0.0 0.0 1.0 12.5
+			specular 0.0 0.0 0.0 1.0 0.5
 
 			texture_unit
 			{
@@ -744,6 +770,24 @@ material Gazebo/WoodPallet
 			}
 		}
 	}
+
+  /*
+  technique
+  {
+    scheme GBuffer
+    pass DeferredShading/GBuffer/Pass_16
+    {
+      lighting off
+
+      vertex_program_ref Gazebo/NateVS
+      {
+      }
+
+      fragment_program_ref Gazebo/NateFS
+      {
+      }
+    }
+  }*/
 }
 
 material Gazebo/Wood
@@ -763,4 +807,23 @@ material Gazebo/Wood
 			}
 		}
 	}
+}
+
+material Gazebo/Road
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.1 0.1 0.1 1.0
+      diffuse 0.8 0.8 0.8 1.0
+      specular 0.01 0.01 0.01 1.0 2.0
+
+			texture_unit
+			{
+				texture road1.jpg
+				filtering trilinear
+			}
+    }
+  }
 }
