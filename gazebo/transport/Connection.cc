@@ -301,11 +301,11 @@ void Connection::EnqueueMsg(const std::string &_buffer,
     return;
   }
 
-  snprintf(this->headerBuffer, HEADER_LENGTH + 1, "%08x",
-      static_cast<unsigned int>(_buffer.size()));
-
   {
     boost::recursive_mutex::scoped_lock lock(this->writeMutex);
+
+    snprintf(this->headerBuffer, HEADER_LENGTH + 1, "%08x",
+        static_cast<unsigned int>(_buffer.size()));
 
     if (this->writeQueue.empty() ||
         (this->writeCount > 0 && this->writeQueue.size() == 1) ||
