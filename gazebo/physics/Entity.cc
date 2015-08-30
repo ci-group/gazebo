@@ -564,7 +564,6 @@ void Entity::Fini()
   Base::Fini();
 
   this->connections.clear();
-  this->node->Fini();
 }
 
 //////////////////////////////////////////////////
