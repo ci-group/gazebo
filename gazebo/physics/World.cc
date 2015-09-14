@@ -116,6 +116,7 @@ World::World(const std::string &_name)
 
   this->dataPtr->receiveMutex = new boost::recursive_mutex();
   this->dataPtr->loadModelMutex = new boost::mutex();
+  this->dataPtr->elementResetMutex = new boost::recursive_mutex();
 
   this->dataPtr->initialized = false;
   this->dataPtr->loaded = false;
@@ -2291,6 +2292,11 @@ msgs::Scene World::GetSceneMsg() const
 boost::mutex *World::GetSetWorldPoseMutex() const
 {
   return this->dataPtr->setWorldPoseMutex;
+}
+
+boost::recursive_mutex *World::GetElementResetMutex() const
+{
+  return this->dataPtr->elementResetMutex;
 }
 
 /////////////////////////////////////////////////

@@ -281,6 +281,10 @@ namespace gazebo
       /// \return Pointer to the mutex.
       public: boost::mutex *GetSetWorldPoseMutex() const;
 
+      /// \brief Get the element reset mutex
+      /// \return Element reset mutex
+      public: boost::recursive_mutex *GetElementResetMutex() const;
+
       /// \brief check if physics engine is enabled/disabled.
       /// \param True if the physics engine is enabled.
       public: bool GetEnablePhysicsEngine();

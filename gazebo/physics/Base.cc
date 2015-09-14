@@ -68,8 +68,10 @@ Base::~Base()
       (*iter)->SetParent(BasePtr());
   }
   this->children.clear();
-  if (this->sdf)
+  if (this->sdf && this->GetWorld()) {
+    boost::recursive_mutex::scoped_lock lock(*this->GetWorld()->GetElementResetMutex());
     this->sdf->Reset();
+  }
   this->sdf.reset();
 }
 
