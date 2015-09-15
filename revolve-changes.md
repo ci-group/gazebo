@@ -6,3 +6,5 @@
   https://bitbucket.org/osrf/gazebo/issues/1722/empty-message-types-caused-by-entity-fini
 - Implements a workaround for model delete race condition, see:
   https://bitbucket.org/osrf/gazebo/issues/1739/race-condition-when-deleting-a-model
+- Adds a fix for the contact sensor race condition:
+  https://bitbucket.org/osrf/gazebo/issues/1740/race-condition-when-deleting-contactsensor
