@@ -149,6 +149,9 @@ namespace gazebo
       /// \brief Contacts message used to output sensor data.
       private: msgs::Contacts contactsMsg;
 
+      /// \brief Name of the collision filter
+      private: std::string filterName;
+
       typedef std::list<boost::shared_ptr<msgs::Contacts const> > ContactMsgs_L;
       private: ContactMsgs_L incomingContacts;
     };
