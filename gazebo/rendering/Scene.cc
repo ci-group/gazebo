@@ -14,6 +14,7 @@
  * limitations under the License.
  *
 */
+#include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "gazebo/rendering/skyx/include/SkyX.h"
@@ -340,8 +341,7 @@ void Scene::Init()
   // Create Fog
   if (this->dataPtr->sdf->HasElement("fog"))
   {
-    boost::shared_ptr<sdf::Element> fogElem =
-        this->dataPtr->sdf->GetElement("fog");
+    sdf::ElementPtr fogElem = this->dataPtr->sdf->GetElement("fog");
     this->SetFog(fogElem->Get<std::string>("type"),
                  fogElem->Get<common::Color>("color"),
                  fogElem->Get<double>("density"),
@@ -2103,6 +2103,10 @@ bool Scene::ProcessSensorMsg(ConstSensorPtr &_msg)
       cameraVis->SetId(_msg->id());
       cameraVis->Load(_msg->logical_camera());
       this->dataPtr->visuals[cameraVis->GetId()] = cameraVis;
+    }
+    else if (_msg->has_pose())
+    {
+      iter->second->SetPose(msgs::ConvertIgn(_msg->pose()));
     }
   }
   else if (_msg->type() == "contact" && _msg->visualize() &&
