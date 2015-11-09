@@ -71,11 +71,14 @@ Entity::Entity(BasePtr _parent)
     this->visualMsg->set_parent_name("no_world_name");
   }
 
-  if (this->parent && this->parent->HasType(ENTITY))
+  auto parent_ = this->parent.lock();
+  if (parent_ && parent_->HasType(ENTITY))
   {
-    this->parentEntity = boost::dynamic_pointer_cast<Entity>(this->parent);
-    this->visualMsg->set_parent_name(this->parentEntity->GetScopedName());
-    this->SetStatic(this->parentEntity->IsStatic());
+    auto parentEntity_ = boost::dynamic_pointer_cast<Entity>(parent_);
+    this->parentEntity = EntityWeakPtr(parentEntity_);
+
+    this->visualMsg->set_parent_name(parentEntity_->GetScopedName());
+    this->SetStatic(parentEntity_->IsStatic());
   }
 
   this->setWorldPoseFunc = &Entity::SetWorldPoseDefault;
@@ -112,19 +115,21 @@ void Entity::Load(sdf::ElementPtr _sdf)
   this->visualMsg->set_name(this->GetScopedName());
 
   {
-    if (this->parent && this->parentEntity)
+    auto parentEntity_ = this->parentEntity.lock();
+    if (parentEntity_)
       this->worldPose = this->sdf->Get<math::Pose>("pose") +
-                        this->parentEntity->worldPose;
+                        parentEntity_->worldPose;
     else
       this->worldPose = this->sdf->Get<math::Pose>("pose");
 
     this->initialRelativePose = this->sdf->Get<math::Pose>("pose");
   }
 
-  if (this->parent)
+  auto parent_ = this->parent.lock();
+  if (parent_)
   {
-    this->visualMsg->set_parent_name(this->parent->GetScopedName());
-    this->visualMsg->set_parent_id(this->parent->GetId());
+    this->visualMsg->set_parent_name(parent_->GetScopedName());
+    this->visualMsg->set_parent_id(parent_->GetId());
   }
   else
   {
@@ -260,13 +265,17 @@ math::Pose Entity::GetRelativePose() const
   {
     return this->initialRelativePose;
   }
-  else if (this->parent && this->parentEntity)
-  {
-    return this->worldPose - this->parentEntity->GetWorldPose();
-  }
   else
   {
-    return this->worldPose;
+    auto parentEntity_ = this->parentEntity.lock();
+    if (parentEntity_)
+    {
+      return this->worldPose - parentEntity_->GetWorldPose();
+    }
+    else
+    {
+      return this->worldPose;
+    }
   }
 }
 
@@ -274,8 +283,9 @@ math::Pose Entity::GetRelativePose() const
 void Entity::SetRelativePose(const math::Pose &_pose, bool _notify,
         bool _publish)
 {
-  if (this->parent && this->parentEntity)
-    this->SetWorldPose(_pose + this->parentEntity->GetWorldPose(), _notify,
+  auto parentEntity_ = this->parentEntity.lock();
+  if (parentEntity_)
+    this->SetWorldPose(_pose + parentEntity_->GetWorldPose(), _notify,
                               _publish);
   else
     this->SetWorldPose(_pose, _notify, _publish);
@@ -375,20 +385,24 @@ void Entity::SetWorldPoseCanonicalLink(const math::Pose &_pose, bool _notify,
   if (_notify)
     this->UpdatePhysicsPose(true);
 
+  auto parentEntity_ = this->parentEntity.lock();
+  if (!parentEntity_)
+    return;
+
   // also update parent model's pose
-  if (this->parentEntity->HasType(MODEL))
+  if (parentEntity_->HasType(MODEL))
   {
     // setting parent Model world pose from canonical link world pose
     // where _pose is the canonical link's world pose
-    this->parentEntity->worldPose = (-this->initialRelativePose) + _pose;
+    parentEntity_->worldPose = (-this->initialRelativePose) + _pose;
 
-    this->parentEntity->worldPose.Correct();
+    parentEntity_->worldPose.Correct();
 
     if (_notify)
-      this->parentEntity->UpdatePhysicsPose(false);
+      parentEntity_->UpdatePhysicsPose(false);
 
     if (_publish)
-      this->parentEntity->PublishPose();
+      parentEntity_->PublishPose();
 
     // Tell collisions that their current world pose is dirty (needs
     // updating). We set a dirty flag instead of directly updating the
@@ -405,7 +419,7 @@ void Entity::SetWorldPoseCanonicalLink(const math::Pose &_pose, bool _notify,
   }
   else
     gzerr << "SWP for CB[" << this->GetName() << "] but parent["
-      << this->parentEntity->GetName() << "] is not a MODEL!\n";
+      << parentEntity_->GetName() << "] is not a MODEL!\n";
 }
 
 //////////////////////////////////////////////////
@@ -513,7 +527,7 @@ ModelPtr Entity::GetParentModel()
   if (this->HasType(MODEL))
     return boost::dynamic_pointer_cast<Model>(shared_from_this());
 
-  p = this->parent;
+  p = this->parent.lock();
   GZ_ASSERT(p, "Parent of an entity is NULL");
 
   while (p->GetParent() && p->GetParent()->HasType(MODEL))
@@ -562,7 +576,6 @@ void Entity::Fini()
     this->requestPub->Publish(*msg, true);
   }
 
-  this->parentEntity.reset();
   Base::Fini();
 
   this->connections.clear();
@@ -583,8 +596,10 @@ void Entity::UpdateParameters(sdf::ElementPtr _sdf)
   Base::UpdateParameters(_sdf);
 
   math::Pose parentPose;
-  if (this->parent && this->parentEntity)
-    parentPose = this->parentEntity->worldPose;
+
+  auto parentEntity_ = this->parentEntity.lock();
+  if (parentEntity_)
+    parentPose = parentEntity_->worldPose;
 
   math::Pose newPose = _sdf->Get<math::Pose>("pose");
   if (newPose != this->GetRelativePose())

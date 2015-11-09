@@ -75,10 +75,12 @@ Link::~Link()
     msgs::Visual msg;
     msg.set_name(iter->second.name());
     msg.set_id(iter->second.id());
-    if (this->parent)
+
+    auto parent_ = this->parent.lock();
+    if (parent_)
     {
-      msg.set_parent_name(this->parent->GetScopedName());
-      msg.set_parent_id(this->parent->GetId());
+      msg.set_parent_name(parent_->GetScopedName());
+      msg.set_parent_id(parent_->GetId());
     }
     else
     {
@@ -92,12 +94,13 @@ Link::~Link()
 
   if (this->cgVisuals.size() > 0)
   {
+    auto parent_ = this->parent.lock();
     for (unsigned int i = 0; i < this->cgVisuals.size(); i++)
     {
       msgs::Visual msg;
       msg.set_name(this->cgVisuals[i]);
-      if (this->parent)
-        msg.set_parent_name(this->parent->GetScopedName());
+      if (parent_)
+        msg.set_parent_name(parent_->GetScopedName());
       else
         msg.set_parent_name("");
       msg.set_delete_me(true);
