@@ -27,6 +27,7 @@ namespace gazebo
     class ODECollision;
     class ODEJoint;
     class ODELink;
+    class ODEModel;
     class ODERayShape;
     class ODESurfaceParams;
     class ODEPhysics;
@@ -42,6 +43,10 @@ namespace gazebo
     /// \def ODELinkPtr
     /// \brief Boost shared point to ODELink
     typedef boost::shared_ptr<ODELink> ODELinkPtr;
+
+    /// \def ODEModelPtr
+    /// \brief Boost shared point to ODEModel
+    typedef boost::shared_ptr<ODEModel> ODEModelPtr;
 
     /// \def ODERayShapePtr
     /// \brief Boost shared point to ODERayShape

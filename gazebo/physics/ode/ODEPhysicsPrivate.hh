@@ -65,9 +65,6 @@ namespace gazebo
       /// \brief Physics step function.
       public: int (*physicsStepFunc)(dxWorld*, dReal);
 
-      /// \brief All the collsiion spaces.
-      public: std::map<std::string, dSpaceID> spaces;
-
       /// \brief All the normal colliders.
       public: std::vector< std::pair<ODECollision*, ODECollision*> > colliders;
 

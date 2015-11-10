@@ -23,6 +23,7 @@ set (sources
   ODELink.cc
   ODEMesh.cc
   ODEMeshShape.cc
+  ODEModel.cc
   ODEMultiRayShape.cc
   ODEPhysics.cc
   ODEPolylineShape.cc
@@ -48,6 +49,7 @@ SET (headers
   ODELink.hh
   ODEMesh.hh
   ODEMeshShape.hh
+  ODEModel.hh
   ODEMultiRayShape.hh
   ODEPhysics.hh
   ODEPlaneShape.hh

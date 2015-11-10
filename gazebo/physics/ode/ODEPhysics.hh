@@ -120,6 +120,9 @@ namespace gazebo
                       { return "ode"; }
 
       // Documentation inherited
+      public: virtual ModelPtr CreateModel(BasePtr _parent);
+
+      // Documentation inherited
       public: virtual LinkPtr CreateLink(ModelPtr _parent);
 
       // Documentation inherited

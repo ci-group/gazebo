@@ -55,6 +55,7 @@
 
 #include "gazebo/physics/ode/ODECollision.hh"
 #include "gazebo/physics/ode/ODELink.hh"
+#include "gazebo/physics/ode/ODEModel.hh"
 #include "gazebo/physics/ode/ODEScrewJoint.hh"
 #include "gazebo/physics/ode/ODEHingeJoint.hh"
 #include "gazebo/physics/ode/ODEGearboxJoint.hh"
@@ -481,22 +482,26 @@ void ODEPhysics::Reset()
   dJointGroupEmpty(this->dataPtr->contactGroup);
 }
 
+ModelPtr ODEPhysics::CreateModel(BasePtr _parent)
+{
+  ODEModelPtr model(new ODEModel(_parent, this->dataPtr->spaceId));
+
+  return model;
+}
+
 //////////////////////////////////////////////////
 LinkPtr ODEPhysics::CreateLink(ModelPtr _parent)
 {
   if (_parent == NULL)
     gzthrow("Link must have a parent\n");
 
-  std::map<std::string, dSpaceID>::iterator iter;
-  iter = this->dataPtr->spaces.find(_parent->GetName());
-
-  if (iter == this->dataPtr->spaces.end())
-    this->dataPtr->spaces[_parent->GetName()] =
-      dSimpleSpaceCreate(this->dataPtr->spaceId);
+  auto _odeParent = boost::dynamic_pointer_cast<ODEModel>(_parent);
+  if (!_odeParent)
+    gzthrow("Link parent is not of type ODEModel");
 
   ODELinkPtr link(new ODELink(_parent));
 
-  link->SetSpaceId(this->dataPtr->spaces[_parent->GetName()]);
+  link->SetSpaceId(_odeParent->GetSpaceId());
   link->SetWorld(_parent->GetWorld());
 
   return link;
