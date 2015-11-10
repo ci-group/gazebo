@@ -325,8 +325,18 @@ msgs::Visual Collision::CreateCollisionVisual()
 
   // Put in a unique ID because this is a special visual.
   msg.set_id(this->collisionVisualId);
-  msg.set_parent_name(this->parent->GetScopedName());
-  msg.set_parent_id(this->parent->GetId());
+
+  auto parent_ = this->parent.lock();
+  if (parent_) {
+      msg.set_parent_name(parent_->GetScopedName());
+      msg.set_parent_id(parent_->GetId());
+  }
+  else
+  {
+      // TODO What else if there is no parent?
+      msg.set_parent_id(0);
+  }
+
   msg.set_is_static(this->IsStatic());
   msg.set_cast_shadows(false);
   msg.set_type(msgs::Visual::COLLISION);

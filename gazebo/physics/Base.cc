@@ -46,9 +46,9 @@ Base::Base(BasePtr _parent)
   this->sdf->AddAttribute("name", "string", "__default__", true);
   this->name = "__default__";
 
-  if (this->parent)
+  if (_parent)
   {
-    this->world = this->parent->GetWorld();
+    this->world = _parent->GetWorld();
   }
 }
 
@@ -56,8 +56,9 @@ Base::Base(BasePtr _parent)
 Base::~Base()
 {
   // remove self as a child of the parent
-  if (this->parent)
-    this->parent->RemoveChild(this->id);
+  auto parent_ = this->parent.lock();
+  if (parent_)
+    parent_->RemoveChild(this->id);
 
   this->SetParent(BasePtr());
 
@@ -88,10 +89,11 @@ void Base::Load(sdf::ElementPtr _sdf)
   else
     this->name.clear();
 
-  if (this->parent)
+  auto parent_ = this->parent.lock();
+  if (parent_)
   {
-    this->world = this->parent->GetWorld();
-    this->parent->AddChild(shared_from_this());
+    this->world = parent_->GetWorld();
+    parent_->AddChild(shared_from_this());
   }
 
   this->ComputeScopedName();
@@ -117,7 +119,6 @@ void Base::Fini()
   this->children.clear();
 
   this->world.reset();
-  this->parent.reset();
 }
 
 //////////////////////////////////////////////////
@@ -175,19 +176,20 @@ bool Base::GetSaveable() const
 //////////////////////////////////////////////////
 int Base::GetParentId() const
 {
-  return this->parent == NULL ? 0 : this->parent->GetId();
+  auto parent_ = this->parent.lock();
+  return parent_ ? 0 : parent_->GetId();
 }
 
 //////////////////////////////////////////////////
 void Base::SetParent(BasePtr _parent)
 {
-  this->parent = _parent;
+  this->parent = BaseWeakPtr(_parent);
 }
 
 //////////////////////////////////////////////////
 BasePtr Base::GetParent() const
 {
-  return this->parent;
+  return this->parent.lock();
 }
 
 //////////////////////////////////////////////////
@@ -313,7 +315,7 @@ std::string Base::GetScopedName(bool _prependWorldName) const
 //////////////////////////////////////////////////
 void Base::ComputeScopedName()
 {
-  BasePtr p = this->parent;
+  auto p = this->parent.lock();
   this->scopedName = this->GetName();
 
   while (p)

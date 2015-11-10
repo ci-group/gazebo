@@ -59,7 +59,10 @@ void BulletCollision::Load(sdf::ElementPtr _sdf)
 void BulletCollision::OnPoseChange()
 {
   math::Pose pose = this->GetRelativePose();
-  BulletLinkPtr bbody = boost::dynamic_pointer_cast<BulletLink>(this->parent);
+
+  auto p = this->parent.lock();
+  if (p)
+    BulletLinkPtr bbody = boost::dynamic_pointer_cast<BulletLink>(p);
 
   // bbody->motionState.setWorldTransform(this, pose);
 }

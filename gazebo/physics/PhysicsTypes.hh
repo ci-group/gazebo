@@ -67,6 +67,10 @@ namespace gazebo
     /// \brief Boost shared pointer to a Base object
     typedef boost::shared_ptr<Base> BasePtr;
 
+    /// \def BaseWeakPtr
+    /// \brief Boost weak pointer to a Base object
+    typedef boost::weak_ptr<Base> BaseWeakPtr;
+
     /// \def ContactPtr
     /// \brief Boost shared pointer to a Contact object
     typedef boost::shared_ptr<Contact> ContactPtr;
@@ -74,6 +78,10 @@ namespace gazebo
     /// \def EntityPtr
     /// \brief Boost shared pointer to an Entity object
     typedef boost::shared_ptr<Entity> EntityPtr;
+
+    /// \def EntityWeakPtr
+    /// \brief Boost weak pointer to an Entity object
+    typedef boost::weak_ptr<Entity> EntityWeakPtr;
 
     /// \def WorldPtr
     /// \brief Boost shared pointer to a World object

@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 
+#include <boost/function.hpp>
 #include "gazebo/msgs/msgs.hh"
 
 #include "gazebo/transport/TransportTypes.hh"
@@ -286,7 +287,7 @@ namespace gazebo
       private: void UpdateAnimation(const common::UpdateInfo &_info);
 
       /// \brief A helper that prevents numerous dynamic_casts.
-      protected: EntityPtr parentEntity;
+      protected: EntityWeakPtr parentEntity;
 
       /// \brief World pose of the entity.
       protected: mutable math::Pose worldPose;
