@@ -185,6 +185,9 @@ namespace gazebo
       /// \brief Collision space id.
       private: dSpaceID spaceId;
 
+      /// \brief Whether or not this link has create its own space
+      private: bool hasOwnSpace;
+
       /// \brief Cache force applied on body
       private: math::Vector3 force;
 
