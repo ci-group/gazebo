@@ -639,7 +639,7 @@ namespace gazebo
       protected: LinkPtr parentLink;
 
       /// \brief Pointer to the parent model.
-      protected: ModelPtr model;
+      protected: ModelWeakPtr model;
 
       /// \brief Anchor pose.  This is the xyz offset of the joint frame from
       /// child frame specified in the parent link frame

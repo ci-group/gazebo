@@ -39,15 +39,15 @@ using namespace physics;
 JointController::JointController(ModelPtr _model)
   : dataPtr(new JointControllerPrivate)
 {
-  this->dataPtr->model = _model;
+  this->dataPtr->model = ModelWeakPtr(_model);
 
-  if (this->dataPtr->model && this->dataPtr->model->GetWorld())
+  if (_model && _model->GetWorld())
   {
     this->dataPtr->node = transport::NodePtr(new transport::Node());
-    this->dataPtr->node->Init(this->dataPtr->model->GetWorld()->GetName());
+    this->dataPtr->node->Init(_model->GetWorld()->GetName());
 
     this->dataPtr->jointCmdSub = this->dataPtr->node->Subscribe(
-        std::string("~/") + this->dataPtr->model->GetName() + "/joint_cmd",
+        std::string("~/") + _model->GetName() + "/joint_cmd",
         &JointController::OnJointCmd, this);
   }
   else
@@ -87,7 +87,7 @@ void JointController::Reset()
 /////////////////////////////////////////////////
 void JointController::Update()
 {
-  common::Time currTime = this->dataPtr->model->GetWorld()->GetSimTime();
+  common::Time currTime = this->dataPtr->model.lock()->GetWorld()->GetSimTime();
   common::Time stepTime = currTime - this->dataPtr->prevUpdateTime;
   this->dataPtr->prevUpdateTime = currTime;
 

@@ -490,10 +490,10 @@ namespace gazebo
       public: void SetPublishData(bool _enable);
 
       /// \brief Get the parent joints.
-      public: Joint_V GetParentJoints() const;
+      public: std::vector<JointWeakPtr> GetParentJoints() const;
 
       /// \brief Get the child joints.
-      public: Joint_V GetChildJoints() const;
+      public: std::vector<JointWeakPtr> GetChildJoints() const;
 
       /// \brief Remove a collision from the link.
       /// \param[int] _name Name of the collision to remove.
@@ -629,10 +629,10 @@ namespace gazebo
       private: std::vector<std::string> sensors;
 
       /// \brief All the parent joints.
-      private: std::vector<JointPtr> parentJoints;
+      private: std::vector<JointWeakPtr> parentJoints;
 
       /// \brief All the child joints.
-      private: std::vector<JointPtr> childJoints;
+      private: std::vector<JointWeakPtr> childJoints;
 
       /// \brief All the attached models.
       private: std::vector<ModelPtr> attachedModels;
