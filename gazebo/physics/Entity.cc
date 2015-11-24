@@ -98,6 +98,8 @@ Entity::~Entity()
   this->visPub.reset();
   this->requestPub.reset();
   this->poseSub.reset();
+
+  this->node->Fini();
   this->node.reset();
 }
 

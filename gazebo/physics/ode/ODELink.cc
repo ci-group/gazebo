@@ -36,6 +36,7 @@ using namespace physics;
 //////////////////////////////////////////////////
 ODELink::ODELink(EntityPtr _parent)
     : Link(_parent),
+      spaceId(NULL),
       hasOwnSpace(false)
 {
   this->linkId = NULL;
