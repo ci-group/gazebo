@@ -17,3 +17,5 @@
   references (no issue yet).
 - Changing `Joint::model` to use a weak pointer to prevent circular references.
 - Changing `JointControllerPrivate::model` to use a weak pointer to prevent circular references.
+- Removing call to `parent_->RemoveChild()` to fix memory leak as suggested in:
+  https://bitbucket.org/osrf/gazebo/issues/1786/invalid-access-of-base-children-results-in
