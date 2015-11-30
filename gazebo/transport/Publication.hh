@@ -142,10 +142,9 @@ namespace gazebo
       public: void AddTransport(const PublicationTransportPtr &_publink);
 
       /// \brief Does a given transport exist?
-      /// \param[in] _host Hostname of the transport
-      /// \param[in] _port Port of the transport
+      /// \param[in] _remoteAddress The initial remote address of the publication
       /// \return true if the transport exists, false otherwise
-      public: bool HasTransport(const std::string &_host, unsigned int _port);
+      public: bool HasTransport(const std::string &_remoteAddress);
 
       /// \brief Add a publisher
       /// \param[in,out] _pub Pointer to publisher object to be added

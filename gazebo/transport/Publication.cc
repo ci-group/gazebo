@@ -134,13 +134,12 @@ void Publication::AddTransport(const PublicationTransportPtr &_publink)
 }
 
 //////////////////////////////////////////////////
-bool Publication::HasTransport(const std::string &_host, unsigned int _port)
+bool Publication::HasTransport(const std::string &_remoteAddress)
 {
   std::list<PublicationTransportPtr>::iterator iter;
   for (iter = this->transports.begin(); iter != this->transports.end(); ++iter)
   {
-    if ((*iter)->GetConnection()->GetRemoteAddress() == _host &&
-        (*iter)->GetConnection()->GetRemotePort() == _port)
+    if ((*iter)->GetRemoteAddress() == _remoteAddress)
     {
       return true;
     }
