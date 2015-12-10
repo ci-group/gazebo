@@ -146,7 +146,7 @@ namespace gazebo
 
       /// \brief Remove a contacts filter and the associated custom publisher
       /// param[in] _name Filter name.
-      public: void RemoveFilter(const std::string &_name);
+      public: void RemoveFilter(std::string _name);
 
       /// \brief Get the number of filters in the contact manager.
       /// return Number of filters

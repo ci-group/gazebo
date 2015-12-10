@@ -20,3 +20,5 @@
 - Removing call to `parent_->RemoveChild()` to fix memory leak as suggested in:
   https://bitbucket.org/osrf/gazebo/issues/1786/invalid-access-of-base-children-results-in
 - Storing the remote host/port of the original "advertise" request when creating a PublicationTransport, so the URLs actually match when checking for a previously existing one (YET TO REPORT THIS ISSUE)
+- Fixing `ContactManager::RemoveFilter()` to be consistent with `CreateFilter()`:
+ https://bitbucket.org/osrf/gazebo/issues/1805/contactmanager-createfilter-and
