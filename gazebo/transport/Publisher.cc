@@ -289,3 +289,9 @@ MessagePtr Publisher::GetPrevMsgPtr() const
   else
     return MessagePtr();
 }
+
+//////////////////////////////////////////////////
+unsigned int Publisher::GetId()
+{
+  return this->id;
+}

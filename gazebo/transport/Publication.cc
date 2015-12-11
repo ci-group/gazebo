@@ -411,8 +411,14 @@ void Publication::RemovePublisher(PublisherPtr _pub)
   std::vector<PublisherPtr>::iterator iter = std::find(
       this->publishers.begin(), this->publishers.end(), _pub);
 
-  if (iter != this->publishers.end())
+  if (iter != this->publishers.end()) {
+    // Remove the prevMsgs from this publisher if present
+    auto pubId = (*iter)->GetId();
+    if (this->prevMsgs.find(pubId) != this->prevMsgs.end())
+      this->prevMsgs.erase(pubId);
+
     this->publishers.erase(iter);
+  }
 }
 
 //////////////////////////////////////////////////

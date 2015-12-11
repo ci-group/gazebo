@@ -22,3 +22,9 @@
 - Storing the remote host/port of the original "advertise" request when creating a PublicationTransport, so the URLs actually match when checking for a previously existing one (YET TO REPORT THIS ISSUE)
 - Fixing `ContactManager::RemoveFilter()` to be consistent with `CreateFilter()`:
  https://bitbucket.org/osrf/gazebo/issues/1805/contactmanager-createfilter-and
+- Removing a `Publisher`'s Publication::prevMsg when it is deleted in `Publication::RemovePublisher`, preventing
+  iteration over a bunch of messages of publishers that are long gone.
+  CREATE ISSUE
+- Cleaning up `TopicManager::subscribedNodes` when a node unsubscribes a topic, so no long list of empty
+  maps can potentially remain.
+  CREATE ISSUE
