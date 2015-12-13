@@ -28,3 +28,5 @@
 - Cleaning up `TopicManager::subscribedNodes` when a node unsubscribes a topic, so no long list of empty
   maps can potentially remain.
   CREATE ISSUE
+- Fixes model bounding boxes:
+  https://bitbucket.org/osrf/gazebo/issues/1325/getboundingbox-returns-the-models-last%20is%20fixed

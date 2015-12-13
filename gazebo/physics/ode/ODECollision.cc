@@ -177,7 +177,10 @@ void ODECollision::SetCollideBits(unsigned int _bits)
 //////////////////////////////////////////////////
 math::Box ODECollision::GetBoundingBox() const
 {
-  math::Box box;
+  // Instantiate with vector values so the box extent is not EXTENT_NULL
+  // See the first comment of Elte Hupkes at issue #1325
+  math::Vector3 a, b;
+  math::Box box(a, b);
   dReal aabb[6];
 
   memset(aabb, 0, 6 * sizeof(dReal));
