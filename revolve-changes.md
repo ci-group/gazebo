@@ -20,7 +20,13 @@
 - Removing call to `parent_->RemoveChild()` to fix memory leak as suggested in:
   https://bitbucket.org/osrf/gazebo/issues/1786/invalid-access-of-base-children-results-in
 - Storing the remote host/port of the original "advertise" request when creating a PublicationTransport, so the URLs actually match when checking for a previously existing one (YET TO REPORT THIS ISSUE)
-- Removing a `Publisher`'s `Publication::prevMsg` when it is deleted in `Publication::RemovePublisher`, preventing the `prevMsg`s from stacking up (YET TO REPORT THIS ISSUE)
-- Fixing `Box` summing issues and using it to fix bounding box issue #1325
-- Fixing inconsistent `ContactManager::CreateFilter()` and `ContactManager::RemoveFilter()`:
-https://bitbucket.org/osrf/gazebo/issues/1805/contactmanager-createfilter-and
+- Fixing `ContactManager::RemoveFilter()` to be consistent with `CreateFilter()`:
+ https://bitbucket.org/osrf/gazebo/issues/1805/contactmanager-createfilter-and
+- Removing a `Publisher`'s Publication::prevMsg when it is deleted in `Publication::RemovePublisher`, preventing
+  iteration over a bunch of messages of publishers that are long gone.
+  CREATE ISSUE
+- Cleaning up `TopicManager::subscribedNodes` when a node unsubscribes a topic, so no long list of empty
+  maps can potentially remain.
+  CREATE ISSUE
+- Fixes model bounding boxes:
+  https://bitbucket.org/osrf/gazebo/issues/1325/getboundingbox-returns-the-models-last%20is%20fixed

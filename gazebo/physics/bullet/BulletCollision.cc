@@ -101,7 +101,10 @@ unsigned int BulletCollision::GetCollideBits() const
 //////////////////////////////////////////////////
 math::Box BulletCollision::GetBoundingBox() const
 {
-  math::Box result;
+  // Instantiate with vector values so the box extent is not EXTENT_NULL
+  // See the first comment of Elte Hupkes at issue #1325
+  math::Vector3 a, b;
+  math::Box result(a, b);
   if (this->collisionShape)
   {
     btVector3 btMin, btMax;

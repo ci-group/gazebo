@@ -686,9 +686,11 @@ ModelPtr Link::GetModel() const
 //////////////////////////////////////////////////
 math::Box Link::GetBoundingBox() const
 {
+  // Create box with extent NULL and no contents. Upon the
+  // first sum an extent NULL box will get the contents of
+  // the box it is summed with.
   math::Box box;
-
-  box.min.Set(GZ_DBL_MAX, GZ_DBL_MAX, GZ_DBL_MAX);
+  box.min.Set(0, 0, 0);
   box.max.Set(0, 0, 0);
 
   for (Collision_V::const_iterator iter = this->collisions.begin();

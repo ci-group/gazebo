@@ -93,6 +93,12 @@ math::Vector3 Box::GetCenter() const
 //////////////////////////////////////////////////
 void Box::Merge(const Box &_box)
 {
+  if (_box.extent == EXTENT_NULL) {
+    // If the other box has NULL contents, summing it should do nothing.
+    // See first comment of Elte Hupkes at issue #1325
+    return;
+  }
+
   if (this->extent == EXTENT_NULL)
   {
     this->min = _box.min;
@@ -119,21 +125,20 @@ Box &Box::operator =(const Box &_b)
 //////////////////////////////////////////////////
 Box Box::operator+(const Box &_b) const
 {
+  // If one of the boxes has NULL extend, return
+  // the other box.
+  if (this->extent == EXTENT_NULL) {
+    return _b;
+  } else if (_b.extent == EXTENT_NULL) {
+    return *this;
+  }
+
   Vector3 mn, mx;
+  mn = this->min;
+  mx = this->max;
 
-  if (this->extent != EXTENT_NULL)
-  {
-    mn = this->min;
-    mx = this->max;
-
-    mn.SetToMin(_b.min);
-    mx.SetToMax(_b.max);
-  }
-  else
-  {
-    mn = _b.min;
-    mx = _b.max;
-  }
+  mn.SetToMin(_b.min);
+  mx.SetToMax(_b.max);
 
   return Box(mn, mx);
 }
@@ -141,17 +146,7 @@ Box Box::operator+(const Box &_b) const
 //////////////////////////////////////////////////
 const Box &Box::operator+=(const Box &_b)
 {
-  if (this->extent != EXTENT_NULL)
-  {
-    this->min.SetToMin(_b.min);
-    this->max.SetToMax(_b.max);
-  }
-  else
-  {
-    this->min = _b.min;
-    this->max = _b.max;
-    this->extent = _b.extent;
-  }
+  this->Merge(_b);
   return *this;
 }
 

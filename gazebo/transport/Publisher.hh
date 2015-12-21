@@ -120,6 +120,10 @@ namespace gazebo
       /// \brief Finalize the publisher.
       public: void Fini();
 
+      /// \brief Return the ID of the publisher
+      /// \return The ID of the publisher
+      public: uint32_t GetId();
+
       /// \brief Implementation of Publish.
       /// \param[in] _message Message to be published.
       /// \param[in] _block Whether to block until the message is actually

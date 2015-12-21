@@ -264,6 +264,12 @@ void TopicManager::Unsubscribe(const std::string &_topic,
       _node->GetMsgType(_topic));
 
   this->subscribedNodes[_topic].remove(_node);
+
+  // If no more nodes exist in the topic, delete the topic to
+  // prevent the map from growing out of control
+  if (!this->subscribedNodes[_topic].size()) {
+    this->subscribedNodes.erase(_topic);
+  }
 }
 
 //////////////////////////////////////////////////
