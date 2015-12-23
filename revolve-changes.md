@@ -34,3 +34,5 @@
   https://bitbucket.org/osrf/gazebo/issues/1470/gzclient-segmentation-fault-on-exit-when-a
   https://bitbucket.org/osrf/gazebo/issues/1680/segmentation-fault-in-gzclient-with-camera
   CREATE ISSUE?
+- Fixing `CameraSensor`s creating identically named cameras in the scene
+  https://bitbucket.org/osrf/gazebo/issues/1811/scene-camera-name-clashes-when-using

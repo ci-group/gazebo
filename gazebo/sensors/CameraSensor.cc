@@ -114,7 +114,7 @@ void CameraSensor::Init()
     }
 
     this->camera = this->scene->CreateCamera(
-        this->sdf->Get<std::string>("name"), false);
+        this->GetScopedName(), false);
 
     if (!this->camera)
     {
@@ -170,7 +170,7 @@ void CameraSensor::Fini()
 
   if (this->camera)
   {
-    this->scene->RemoveCamera(this->camera->GetName());
+    this->scene->RemoveCamera(this->GetScopedName());
   }
 
   this->camera.reset();
