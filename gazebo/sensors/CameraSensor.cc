@@ -134,7 +134,7 @@ void CameraSensor::Init()
     }
 
     this->camera->Init();
-    this->camera->CreateRenderTexture(this->GetName() + "_RttTex");
+    this->camera->CreateRenderTexture(this->camera->GetScopedUniqueName() + "_RttTex");
     ignition::math::Pose3d cameraPose = this->pose;
     if (cameraSdf->HasElement("pose"))
       cameraPose = cameraSdf->Get<ignition::math::Pose3d>("pose") + cameraPose;

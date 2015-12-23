@@ -144,7 +144,7 @@ void MultiCameraSensor::Init()
       gzthrow("Image has zero size");
 
     camera->Init();
-    camera->CreateRenderTexture(camera->GetName() + "_RttTex");
+    camera->CreateRenderTexture(camera->GetScopedUniqueName() + "_RttTex");
 
     ignition::math::Pose3d cameraPose = this->pose;
     if (cameraSdf->HasElement("pose"))

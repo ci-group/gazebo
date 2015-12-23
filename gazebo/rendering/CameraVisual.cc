@@ -65,7 +65,7 @@ void CameraVisual::Load(const msgs::CameraSensor &_msg)
   sdf::ElementPtr cameraElem = msgs::CameraSensorToSDF(_msg);
   dPtr->camera->Load(cameraElem);
   dPtr->camera->Init();
-  dPtr->camera->CreateRenderTexture(this->GetName() + "_RTT");
+  dPtr->camera->CreateRenderTexture(dPtr->camera->GetScopedUniqueName() + "_RTT");
 
   Ogre::MaterialPtr material =
     Ogre::MaterialManager::getSingleton().create(

@@ -30,3 +30,7 @@
   CREATE ISSUE
 - Fixes model bounding boxes:
   https://bitbucket.org/osrf/gazebo/issues/1325/getboundingbox-returns-the-models-last%20is%20fixed
+- Fixing `CameraSensor` segmentation faults, possibly related:
+  https://bitbucket.org/osrf/gazebo/issues/1470/gzclient-segmentation-fault-on-exit-when-a
+  https://bitbucket.org/osrf/gazebo/issues/1680/segmentation-fault-in-gzclient-with-camera
+  CREATE ISSUE?

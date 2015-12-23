@@ -2303,18 +2303,24 @@ void Scene::ProcessRequestMsg(ConstRequestPtr &_msg)
     }
     // Otherwise delete a visual
     else
-    {
+    { 
       VisualPtr visPtr;
       try
       {
-        Visual_M::iterator iter;
-        iter = this->dataPtr->visuals.find(
+        // Try to find by ID
+        auto iter = this->dataPtr->visuals.find(
             boost::lexical_cast<uint32_t>(_msg->data()));
-        visPtr = iter->second;
+
+        if (iter != this->dataPtr->visuals.end())
+          visPtr = iter->second;
       } catch(...)
       {
-        visPtr = this->GetVisual(_msg->data());
+        // Casting error, not numeric
       }
+
+      if (!visPtr)
+        // Not located by ID, find by name
+        visPtr = this->GetVisual(_msg->data());
 
       if (visPtr)
         this->RemoveVisual(visPtr);

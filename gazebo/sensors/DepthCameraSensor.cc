@@ -111,8 +111,8 @@ void DepthCameraSensor::Init()
     }
 
     this->camera->Init();
-    this->camera->CreateRenderTexture(this->GetName() + "_RttTex_Image");
-    this->camera->CreateDepthTexture(this->GetName() + "_RttTex_Depth");
+    this->camera->CreateRenderTexture(this->camera->GetScopedUniqueName() + "_RttTex_Image");
+    this->camera->CreateDepthTexture(this->camera->GetScopedUniqueName() + "_RttTex_Depth");
     this->camera->SetWorldPose(this->pose);
     this->camera->AttachToVisual(this->parentId, true);
   }

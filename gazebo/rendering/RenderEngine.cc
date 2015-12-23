@@ -203,9 +203,10 @@ ScenePtr RenderEngine::CreateScene(const std::string &_name,
   {
     scene->Init();
   }
-  catch(...)
+  catch(const std::exception& e)
   {
-    gzerr << "Failed to initialize scene\n";
+    auto msg = e.what();
+    gzerr << "Failed to initialize scene: " << msg << "\n";
     scene.reset();
     return scene;
   }
