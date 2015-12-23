@@ -36,3 +36,5 @@
   CREATE ISSUE?
 - Fixing `CameraSensor`s creating identically named cameras in the scene
   https://bitbucket.org/osrf/gazebo/issues/1811/scene-camera-name-clashes-when-using
+- Fixing `AxisVisual` arrows not being removed from scene when deleting model
+  https://bitbucket.org/osrf/gazebo/issues/1812/arrows-of-axisvisual-are-never-removed
