@@ -106,6 +106,10 @@ namespace gazebo
     /// \brief Shared pointer to Visual
     typedef boost::shared_ptr<Visual> VisualPtr;
 
+    /// \def VisualWeakPtr
+    /// \brief Weak pointer to Visual
+    typedef boost::weak_ptr<Visual> VisualWeakPtr;
+
     /// \def LaserVisualPtr
     /// \brief Shared pointer to LaserVisual
     typedef boost::shared_ptr<LaserVisual> LaserVisualPtr;

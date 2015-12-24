@@ -163,7 +163,7 @@ void Visual::Init(const std::string &_name, VisualPtr _parent,
   this->dataPtr->sceneNode = pnode->createChildSceneNode(this->GetName());
 
   this->dataPtr->parent = _parent;
-  this->dataPtr->scene = this->dataPtr->parent->GetScene();
+  this->dataPtr->scene = _parent->GetScene();
   this->Init();
 }
 
@@ -210,8 +210,9 @@ void Visual::Fini()
   this->dataPtr->plugins.clear();
 
   // Detach from the parent
-  if (this->dataPtr->parent)
-    this->dataPtr->parent->DetachVisual(this->GetName());
+  auto parent = this->dataPtr->parent.lock();
+  if (parent)
+    parent->DetachVisual(this->GetName());
 
   if (this->dataPtr->sceneNode)
   {
@@ -321,8 +322,9 @@ void Visual::Load()
   Ogre::Vector3 meshSize(1, 1, 1);
   Ogre::MovableObject *obj = NULL;
 
-  if (this->dataPtr->parent)
-    this->dataPtr->parent->AttachVisual(shared_from_this());
+  auto parent = this->dataPtr->parent.lock();
+  if (parent)
+    parent->AttachVisual(shared_from_this());
 
   // Read the desired position and rotation of the mesh
   pose = this->dataPtr->sdf->Get<math::Pose>("pose");
@@ -2398,7 +2400,7 @@ void Visual::UpdateFromMsg(const boost::shared_ptr< msgs::Visual const> &_msg)
 //////////////////////////////////////////////////
 VisualPtr Visual::GetParent() const
 {
-  return this->dataPtr->parent;
+  return this->dataPtr->parent.lock();
 }
 
 //////////////////////////////////////////////////

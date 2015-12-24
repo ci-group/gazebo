@@ -40,3 +40,5 @@
   https://bitbucket.org/osrf/gazebo/issues/1812/arrows-of-axisvisual-are-never-removed
 - Fixing creation of redundant Joint visuals:
   https://bitbucket.org/osrf/gazebo/issues/1816/multiple-redundant-jointvisual-s-created
+- Changing `Visual` parent reference to be a weak pointer:
+  https://bitbucket.org/osrf/gazebo/issues/1817/circular-references-in-visual-lead-to

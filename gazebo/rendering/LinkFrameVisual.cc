@@ -44,7 +44,7 @@ void LinkFrameVisual::Load()
   AxisVisual::Load();
 
   double linkSize = std::max(0.1,
-      dPtr->parent->GetBoundingBox().GetSize().GetLength());
+      dPtr->parent.lock()->GetBoundingBox().GetSize().GetLength());
   linkSize = std::min(linkSize, 1.0);
   dPtr->scaleToLink = math::Vector3(linkSize * 0.7,
                                     linkSize * 0.7,

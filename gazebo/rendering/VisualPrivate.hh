@@ -89,7 +89,7 @@ namespace gazebo
       public: Ogre::SceneNode *sceneNode;
 
       /// \brief Parent visual.
-      public: VisualPtr parent;
+      public: VisualWeakPtr parent;
 
       /// \brief The SDF element for the visual.
       public: sdf::ElementPtr sdf;
