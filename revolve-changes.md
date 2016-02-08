@@ -43,3 +43,4 @@
 - Changing `Visual` parent reference to be a weak pointer:
   https://bitbucket.org/osrf/gazebo/issues/1817/circular-references-in-visual-lead-to
 - Don't create contacts message in ContactManager when there are no connections
+- Changing `Base::GetName()` and `Base::GetScopedName()` to return const string references to prevent continuous allocations

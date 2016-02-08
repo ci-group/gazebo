@@ -183,7 +183,7 @@ namespace gazebo
 
       /// \brief Return the name of the entity.
       /// \return Name of the entity.
-      public: std::string GetName() const;
+      public: const std::string & GetName() const;
 
       /// \brief Return the ID of this entity. This id is unique.
       /// \return Integer ID.
@@ -274,7 +274,7 @@ namespace gazebo
       /// with the world name. The result will be
       /// world::model1::...::modelN::entityName.
       /// \return The scoped name.
-      public: std::string GetScopedName(bool _prependWorldName = false) const;
+      public: const std::string &GetScopedName(bool _prependWorldName = false) const;
 
       /// \brief Print this object to screen via gzmsg.
       /// \param[in] _prefix Usually a set of spaces.
@@ -342,6 +342,9 @@ namespace gazebo
 
       /// \brief Local copy of the scoped name.
       private: std::string scopedName;
+
+      /// \brief Local copy of the scoped name including the world name
+      private: std::string worldScopedName;
 
       protected: friend class Entity;
     };

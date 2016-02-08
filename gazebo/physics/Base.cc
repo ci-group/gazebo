@@ -145,7 +145,7 @@ void Base::SetName(const std::string &_name)
 }
 
 //////////////////////////////////////////////////
-std::string Base::GetName() const
+const std::string & Base::GetName() const
 {
   return this->name;
 }
@@ -299,10 +299,10 @@ BasePtr Base::GetByName(const std::string &_name)
 }
 
 //////////////////////////////////////////////////
-std::string Base::GetScopedName(bool _prependWorldName) const
+const std::string & Base::GetScopedName(bool _prependWorldName) const
 {
   if (_prependWorldName)
-    return this->world->GetName() + "::" + this->scopedName;
+    return this->worldScopedName;
   else
     return this->scopedName;
 }
@@ -318,6 +318,10 @@ void Base::ComputeScopedName()
     if (p->GetParent())
       this->scopedName.insert(0, p->GetName()+"::");
     p = p->GetParent();
+  }
+
+  if (this->world) {
+     this->worldScopedName = this->world->GetName() + "::" + this->scopedName;
   }
 }
 
@@ -371,6 +375,7 @@ bool Base::operator ==(const Base &ent) const
 void Base::SetWorld(const WorldPtr &_newWorld)
 {
   this->world = _newWorld;
+  this->ComputeScopedName();
 
   Base_V::iterator iter;
   for (iter = this->children.begin(); iter != this->children.end(); ++iter)
