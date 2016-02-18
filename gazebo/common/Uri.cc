@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- */
+*/
 
+#include <algorithm>
+#include <list>
+#include <map>
 #include <string>
-#include <vector>
+
 #include "gazebo/common/Exception.hh"
-#include "gazebo/common/Uri.hh"
+#include "gazebo/common/URI.hh"
 
 using namespace gazebo;
 using namespace common;
@@ -28,472 +31,465 @@ namespace gazebo
   namespace common
   {
     /// \internal
-    /// \brief UriEntityPart private data.
-    class UriEntityPrivate
+    /// \brief URIPath private data.
+    class TokenizerPrivate
     {
-      /// \brief URI entity type.
-      public: std::string type;
+      /// \brief Input string.
+      public: std::string buffer;
 
-      /// \brief URI entity name.
-      public: std::string name;
+      /// \brief Current position under check.
+      public: size_t currPos;
     };
 
     /// \internal
-    /// \brief UriNestedEntity private data.
-    class UriNestedEntityPrivate
+    /// \brief URIPath private data.
+    class URIPathPrivate
     {
-      /// \brief Nested URI entities.
-      public: std::vector<UriEntity> entities;
+      /// \brief The parts of the path.
+      public: std::list<std::string> path;
     };
 
     /// \internal
-    /// \brief UriParts private data.
-    class UriPartsPrivate
+    /// \brief URIQuery private data.
+    class URIQueryPrivate
     {
-      /// \brief World name.
-      public: std::string world;
-
-      /// \brief URI nested entity.
-      public: UriNestedEntity entity;
-
-      /// \brief Parameter.
-      public: std::string parameter;
+      /// \brief The key/value tuples that compose the query.
+      public: std::map<std::string, std::string> values;
     };
 
     /// \internal
-    /// \brief Uri private data.
-    class UriPrivate
+    /// \brief URI private data.
+    class URIPrivate
     {
-      /// \brief The individual parts of the URI.
-      public: UriParts parts;
+      /// \brief The URI scheme.
+      public: std::string scheme;
 
-      /// \brief The string representation of the URI.
-      public: std::string canonicalUri;
+      /// \brief Path component.
+      public: URIPath path;
 
-      /// \brief True when the object is storing a valid URI.
-      public: bool correct = false;
+      /// \brief Query component.
+      public: URIQuery query;
     };
   }
 }
 
-//////////////////////////////////////////////////
-UriEntity::UriEntity()
-  : dataPtr(new UriEntityPrivate())
+/////////////////////////////////////////////////
+Tokenizer::Tokenizer(const std::string &_str)
+  : dataPtr(new TokenizerPrivate())
 {
+  this->dataPtr->buffer = _str;
+  this->dataPtr->currPos = 0;
 }
 
-//////////////////////////////////////////////////
-UriEntity::UriEntity(const std::string &_type, const std::string &_name)
-  : UriEntity()
+/////////////////////////////////////////////////
+std::vector<std::string> Tokenizer::Split(const std::string &_delim)
 {
-  this->SetType(_type);
-  this->SetName(_name);
+  std::vector<std::string> tokens;
+  std::string token;
+
+  this->dataPtr->currPos = 0;
+  while ((token = this->NextToken(_delim)) != "")
+    tokens.push_back(token);
+
+  return tokens;
 }
 
-//////////////////////////////////////////////////
-UriEntity::UriEntity(const UriEntity &_entity)
-  : UriEntity()
+/////////////////////////////////////////////////
+std::string Tokenizer::NextToken(const std::string &_delim)
 {
-  *this = _entity;
-}
+  std::string token;
+  this->SkipDelimiter(_delim);
 
-//////////////////////////////////////////////////
-UriEntity::~UriEntity()
-{
-}
-
-//////////////////////////////////////////////////
-std::string UriEntity::Type() const
-{
-  return this->dataPtr->type;
-}
-
-//////////////////////////////////////////////////
-std::string UriEntity::Name() const
-{
-  return this->dataPtr->name;
-}
-
-//////////////////////////////////////////////////
-void UriEntity::SetType(const std::string &_type)
-{
-  this->Validate(_type);
-  this->dataPtr->type = _type;
-}
-
-//////////////////////////////////////////////////
-void UriEntity::SetName(const std::string &_name)
-{
-  this->Validate(_name);
-  this->dataPtr->name = _name;
-}
-
-//////////////////////////////////////////////////
-UriEntity &UriEntity::operator=(const UriEntity &_p)
-{
-  this->SetType(_p.Type());
-  this->SetName(_p.Name());
-
-  return *this;
-}
-
-//////////////////////////////////////////////////
-void UriEntity::Validate(const std::string &_identifier)
-{
-  if (_identifier.find_first_of(" ?=&") != std::string::npos)
-    gzthrow("Invalid URI entity identifier");
-}
-
-//////////////////////////////////////////////////
-UriNestedEntity::UriNestedEntity()
-  : dataPtr(new UriNestedEntityPrivate())
-{
-}
-
-//////////////////////////////////////////////////
-UriNestedEntity::UriNestedEntity(const UriNestedEntity &_entity)
-  : UriNestedEntity()
-{
-  *this = _entity;
-}
-
-//////////////////////////////////////////////////
-UriNestedEntity::~UriNestedEntity()
-{
-}
-
-//////////////////////////////////////////////////
-UriEntity UriNestedEntity::Parent() const
-{
-  if (this->dataPtr->entities.empty())
-    gzthrow("Empty nested entity");
-
-  return this->dataPtr->entities.front();
-}
-
-//////////////////////////////////////////////////
-UriEntity UriNestedEntity::Leaf() const
-{
-  if (this->dataPtr->entities.empty())
-    gzthrow("Empty nested entity");
-
-  return this->dataPtr->entities.back();
-}
-
-//////////////////////////////////////////////////
-UriEntity UriNestedEntity::Entity(const unsigned int &_index) const
-{
-  if (_index >= this->dataPtr->entities.size())
-    gzthrow("Incorrect index accessing a nested entity");
-
-  return this->dataPtr->entities.at(_index);
-}
-
-//////////////////////////////////////////////////
-unsigned int UriNestedEntity::EntityCount() const
-{
-  return this->dataPtr->entities.size();
-}
-
-//////////////////////////////////////////////////
-void UriNestedEntity::AddEntity(const UriEntity &_entity)
-{
-  this->dataPtr->entities.push_back(_entity);
-}
-
-//////////////////////////////////////////////////
-void UriNestedEntity::AddParentEntity(const UriEntity &_entity)
-{
-  this->dataPtr->entities.insert(this->dataPtr->entities.begin(), _entity);
-}
-
-//////////////////////////////////////////////////
-void UriNestedEntity::Clear()
-{
-  this->dataPtr->entities.clear();
-}
-
-//////////////////////////////////////////////////
-UriNestedEntity &UriNestedEntity::operator=(const UriNestedEntity &_p)
-{
-  this->dataPtr->entities.clear();
-  for (auto i = 0u; i < _p.EntityCount(); ++i)
-    this->AddEntity(_p.Entity(i));
-
-  return *this;
-}
-
-//////////////////////////////////////////////////
-UriParts::UriParts()
-  : dataPtr(new UriPartsPrivate())
-{
-}
-
-//////////////////////////////////////////////////
-UriParts::UriParts(const std::string &_uri)
-  : UriParts()
-{
-  this->Parse(_uri);
-}
-
-
-//////////////////////////////////////////////////
-UriParts::UriParts(const UriParts &_parts)
-  : UriParts()
-{
-  *this = _parts;
-}
-
-//////////////////////////////////////////////////
-UriParts::~UriParts()
-{
-}
-
-//////////////////////////////////////////////////
-std::string UriParts::World() const
-{
-  return this->dataPtr->world;
-}
-
-//////////////////////////////////////////////////
-UriNestedEntity &UriParts::Entity() const
-{
-  return this->dataPtr->entity;
-}
-
-//////////////////////////////////////////////////
-std::string UriParts::Parameter() const
-{
-  return this->dataPtr->parameter;
-}
-
-//////////////////////////////////////////////////
-void UriParts::SetWorld(const std::string &_world)
-{
-  this->dataPtr->world = _world;
-}
-
-//////////////////////////////////////////////////
-void UriParts::SetEntity(const UriNestedEntity &_entity)
-{
-  this->dataPtr->entity = _entity;
-}
-
-//////////////////////////////////////////////////
-void UriParts::SetParameter(const std::string &_param)
-{
-  this->dataPtr->parameter = _param;
-}
-
-//////////////////////////////////////////////////
-UriParts &UriParts::operator=(const UriParts &_p)
-{
-  this->SetWorld(_p.World());
-  this->SetEntity(_p.Entity());
-  this->SetParameter(_p.Parameter());
-
-  return *this;
-}
-
-//////////////////////////////////////////////////
-void UriParts::Parse(const std::string &_uri)
-{
-  size_t paramBegin;
-  std::string uri = _uri;
-
-  // Remove trailing '/'
-  if (uri.back() == '/')
-    uri.pop_back();
-
-  this->ParseEntity(uri, paramBegin);
-  this->ParseParameter(uri, paramBegin);
-}
-
-//////////////////////////////////////////////////
-void UriParts::ParseEntity(const std::string &_uri, size_t &_next)
-{
-  size_t from = 0;
-
-  // No entity.
-  if ((from >= _uri.size()) || (_uri.at(from) == '?'))
-    gzthrow("Unable to parse URI. Empty world");
-
-  this->dataPtr->entity.Clear();
-
-  bool first = true;
-  while (true)
+  // Append each char to token string until it meets delimiter.
+  while (this->dataPtr->currPos < this->dataPtr->buffer.size() &&
+         !this->IsDelimiter(_delim, this->dataPtr->currPos))
   {
-    UriEntity entity;
-    if (!UriParts::ParseOneEntity(_uri, from, entity, _next))
-      gzthrow("Unable to parse entity");
+    token += this->dataPtr->buffer.at(this->dataPtr->currPos);
+    ++this->dataPtr->currPos;
+  }
 
-    // Set the world.
-    if (first)
-    {
-      if (entity.Type() != "world")
-        gzthrow("Unable to parse world keyword");
+  return token;
+}
 
-      this->SetWorld(entity.Name());
-      first = false;
-    }
-    else
-      this->dataPtr->entity.AddEntity(entity);
-
-    from = _next;
-
-    if ((_next >= _uri.size()) || (_uri.at(_next) == '?'))
-      return;
-
-    // The URI doesn't have parameter and ends with "/".
-    if ((_uri.at(_next) == '/') && (_next + 1 >= _uri.size()))
-    {
-      _next += 1;
-      return;
-    }
+/////////////////////////////////////////////////
+void Tokenizer::SkipDelimiter(const std::string &_delim)
+{
+  while (this->dataPtr->currPos < this->dataPtr->buffer.size() &&
+         this->IsDelimiter(_delim, this->dataPtr->currPos))
+  {
+    this->dataPtr->currPos += _delim.size();
   }
 }
 
-//////////////////////////////////////////////////
-bool UriParts::ParseOneEntity(const std::string &_uri, const size_t &_from,
-    UriEntity &_entity, size_t &_next)
+/////////////////////////////////////////////////
+bool Tokenizer::IsDelimiter(const std::string &_delim,
+    const size_t _pos) const
 {
-  auto next = _uri.find("/", _from + 1);
-  if (next == std::string::npos)
+  return this->dataPtr->buffer.find(_delim, _pos) == _pos;
+}
+
+/////////////////////////////////////////////////
+URIPath::URIPath()
+  : dataPtr(new URIPathPrivate())
+{
+}
+
+/////////////////////////////////////////////////
+URIPath::~URIPath()
+{
+}
+
+/////////////////////////////////////////////////
+URIPath::URIPath(const std::string &_str)
+  : URIPath()
+{
+  if (!this->Load(_str))
+    gzthrow("Invalid URIPath");
+}
+
+/////////////////////////////////////////////////
+URIPath::URIPath(const URIPath &_path)
+  : URIPath()
+{
+  *this = _path;
+}
+
+/////////////////////////////////////////////////
+bool URIPath::Load(const std::string &_str)
+{
+  URIPath newPath;
+  if (!this->Valid(_str, newPath))
     return false;
 
-  auto type = _uri.substr(_from + 1, next - _from - 1);
-  if (type.find_first_of(" ?&=") != std::string::npos)
+  *this = newPath;
+  return true;
+}
+
+/////////////////////////////////////////////////
+void URIPath::PushFront(const std::string &_part)
+{
+  this->dataPtr->path.push_front(_part);
+}
+
+/////////////////////////////////////////////////
+void URIPath::PushBack(const std::string &_part)
+{
+  this->dataPtr->path.push_back(_part);
+}
+
+/////////////////////////////////////////////////
+const URIPath URIPath::operator/(const std::string &_part) const
+{
+  URIPath result = *this;
+  result /= _part;
+  return result;
+}
+
+/////////////////////////////////////////////////
+const URIPath &URIPath::operator/=(const std::string &_part)
+{
+  this->dataPtr->path.push_back(_part);
+  return *this;
+}
+
+/////////////////////////////////////////////////
+std::string URIPath::Str(const std::string &_delim) const
+{
+  std::string result;
+  for (auto const &part : this->dataPtr->path)
+  {
+    if (!result.empty())
+      result += _delim;
+    result += part;
+  }
+
+  return result;
+}
+
+/////////////////////////////////////////////////
+URIPath &URIPath::operator=(const URIPath &_path)
+{
+  this->dataPtr->path = _path.dataPtr->path;
+  return *this;
+}
+
+/////////////////////////////////////////////////
+void URIPath::Clear()
+{
+  this->dataPtr->path.clear();
+}
+
+/////////////////////////////////////////////////
+bool URIPath::operator==(const URIPath &_path) const
+{
+  return this->dataPtr->path == _path.dataPtr->path;
+}
+
+/////////////////////////////////////////////////
+bool URIPath::Valid(const std::string &_str, URIPath &_path)
+{
+  size_t slashCount = std::count(_str.begin(), _str.end(), '/');
+  if ((_str.empty()) ||
+      (slashCount == _str.size()) ||
+      (_str.find_first_of(" ?=&") != std::string::npos))
+  {
     return false;
-  _entity.SetType(type);
+  }
 
-  next += 1;
-  auto to = _uri.find_first_of("/?", next);
-  if (to == std::string::npos)
+  _path.Clear();
+
+  Tokenizer tokenizer(_str);
+  for (auto part : tokenizer.Split("/"))
+    _path.PushBack(part);
+
+  return true;
+}
+
+/////////////////////////////////////////////////
+URIQuery::URIQuery()
+  : dataPtr(new URIQueryPrivate())
+{
+}
+
+/////////////////////////////////////////////////
+URIQuery::URIQuery(const std::string &_str)
+  : URIQuery()
+{
+  if (!this->Load(_str))
+    gzthrow("Invalid URIQuery");
+}
+
+/////////////////////////////////////////////////
+URIQuery::URIQuery(const URIQuery &_query)
+  : URIQuery()
+{
+  *this = _query;
+}
+
+/////////////////////////////////////////////////
+URIQuery::~URIQuery()
+{
+}
+
+/////////////////////////////////////////////////
+bool URIQuery::Load(const std::string &_str)
+{
+  URIQuery newQuery;
+  if (!this->Valid(_str, newQuery))
+    return false;
+
+  *this = newQuery;
+  return true;
+}
+
+/////////////////////////////////////////////////
+const URIQuery URIQuery::Insert(const std::string &_key,
+                                const std::string &_value)
+{
+  URIQuery result = *this;
+  result.dataPtr->values.insert(std::make_pair(_key, _value));
+  return result;
+}
+
+/////////////////////////////////////////////////
+URIQuery &URIQuery::operator=(const URIQuery &_query)
+{
+  this->dataPtr->values = _query.dataPtr->values;
+  return *this;
+}
+
+/////////////////////////////////////////////////
+std::string URIQuery::Str(const std::string &_delim) const
+{
+  if (this->dataPtr->values.empty())
+      return "";
+
+  std::string result = "?";
+  for (auto const &value : this->dataPtr->values)
   {
-    if (next == _uri.size())
-    {
-      // No name after the type.
+    if (result != "?")
+      result += _delim;
+    result += value.first + "=" + value.second;
+  }
+
+  return result;
+}
+
+/////////////////////////////////////////////////
+void URIQuery::Clear()
+{
+  this->dataPtr->values.clear();
+}
+
+/////////////////////////////////////////////////
+bool URIQuery::operator==(const URIQuery &_query) const
+{
+  return this->Str() == _query.Str();
+}
+
+/////////////////////////////////////////////////
+bool URIQuery::Valid(const std::string &_str, URIQuery &_query)
+{
+  if ((std::count(_str.begin(), _str.end(), '?') != 1u) ||
+      (_str.find("?") != 0u) ||
+      (_str.find_first_of(" ") != std::string::npos))
+  {
+    return false;
+  }
+
+  _query.Clear();
+
+  Tokenizer tokenizer(_str.substr(1));
+  auto queries = tokenizer.Split("&");
+  for (auto query : queries)
+  {
+    Tokenizer tk(query);
+    auto values = tk.Split("=");
+    if (values.size() != 2u)
       return false;
-    }
-    else
-    {
-      // Check whether invalid characters ' ', '?', '&', or '=' are found.
-      auto name = _uri.substr(next, _uri.size() - next);
-      if (name.find_first_of(" ?&=") != std::string::npos)
-        return false;
 
-      _entity.SetName(name);
-      _next = _uri.size();
-      return true;
-    }
+    _query.Insert(values.at(0), values.at(1));
   }
-  else
+  return true;
+}
+
+/////////////////////////////////////////////////
+URI::URI()
+  : dataPtr(new URIPrivate())
+{
+}
+
+/////////////////////////////////////////////////
+URI::URI(const std::string &_str)
+  : URI()
+{
+  if (!this->Load(_str))
+    gzthrow("Invalid URI");
+}
+
+/////////////////////////////////////////////////
+URI::URI(const URI &_uri)
+  : URI()
+{
+  *this = _uri;
+}
+
+/////////////////////////////////////////////////
+URI::~URI()
+{
+}
+
+/////////////////////////////////////////////////
+bool URI::Load(const std::string &_str)
+{
+  URI newUri;
+  if (!this->Valid(_str, newUri))
+    return false;
+
+  *this = newUri;
+  return true;
+}
+
+//////////////////////////////////////////////////
+std::string URI::Str() const
+{
+  std::string result =
+    this->dataPtr->scheme.empty() ? "" : this->dataPtr->scheme + "://";
+  result += this->dataPtr->path.Str() + this->dataPtr->query.Str();
+  return result;
+}
+
+/////////////////////////////////////////////////
+std::string URI::Scheme() const
+{
+  return this->dataPtr->scheme;
+}
+
+/////////////////////////////////////////////////
+void URI::SetScheme(const std::string &_scheme)
+{
+  this->dataPtr->scheme = _scheme;
+}
+
+/////////////////////////////////////////////////
+URIPath &URI::Path()
+{
+  return this->dataPtr->path;
+}
+
+/////////////////////////////////////////////////
+URIQuery &URI::Query()
+{
+  return this->dataPtr->query;
+}
+
+/////////////////////////////////////////////////
+void URI::Clear()
+{
+  this->dataPtr->scheme.clear();
+  this->dataPtr->path.Clear();
+  this->dataPtr->query.Clear();
+}
+
+/////////////////////////////////////////////////
+bool URI::operator==(const URI &_uri) const
+{
+  return this->dataPtr->scheme == _uri.dataPtr->scheme &&
+         this->dataPtr->path == _uri.dataPtr->path &&
+         this->dataPtr->query == _uri.dataPtr->query;
+}
+
+/////////////////////////////////////////////////
+URI &URI::operator=(const URI &_uri)
+{
+  this->dataPtr->scheme = _uri.dataPtr->scheme;
+  this->dataPtr->path = _uri.dataPtr->path;
+  this->dataPtr->query = _uri.dataPtr->query;
+  return *this;
+}
+
+/////////////////////////////////////////////////
+bool URI::Valid(const std::string &_str, URI &_uri)
+{
+  // Validate scheme.
+  const std::string kSchemeDelim = "://";
+  auto schemeDelimPos = _str.find(kSchemeDelim);
+  if ((_str.empty()) ||
+      (schemeDelimPos == std::string::npos) ||
+      (schemeDelimPos == 0u))
   {
-    // Check whether invalid characters ' ', '?', '&', or '=' are found.
-    auto name = _uri.substr(next, to - next);
-    if (name.find_first_of(" ?&=") != std::string::npos)
-      return false;
-
-    _entity.SetName(name);
-    _next = to;
-    return true;
+    return false;
   }
-}
 
-//////////////////////////////////////////////////
-void UriParts::ParseParameter(const std::string &_uri, const size_t &_from)
-{
-  size_t from = _from;
-  this->SetParameter("");
+  auto from = schemeDelimPos + kSchemeDelim.size();
+  std::string scheme = _str.substr(0, schemeDelimPos);
+  std::string path = _str.substr(from);
+  std::string query;
 
-  // No parameter.
-  if (_from >= _uri.size())
-    return;
-
-  // The first character of the parameter list has to be a '?'.
-  if (_uri.at(from) != '?')
-    gzthrow("Unable to parse parameter ('?' not found)");
-
-  from += 1;
-
-  auto to = _uri.find("=", from);
-  if ((to == std::string::npos) || (to == _uri.size() - 1))
-    gzthrow("Unable to parse parameter ('=' not found)");
-
-  // The parameter follows this convention: "p=value1".
-  // The name of the parameter (left from the '=') and the value (right from the
-  // '=') cannot contain ' ', '?', '=' or '&'.
-  auto left = _uri.substr(from, to - from);
-  if (left.find_first_of(" ?&=") != std::string::npos)
-    gzthrow("Unable to parse parameter (invalid parameter name)");
-
-  from = to + 1;
-  std::string right = _uri.substr(from);
-  if (right.find_first_of(" ?&=") != std::string::npos)
-    gzthrow("Unable to parse parameter (invalid parameter value)");
-
-  this->SetParameter(right);
-}
-
-//////////////////////////////////////////////////
-Uri::Uri(const std::string &_uri)
-  : dataPtr(new UriPrivate())
-{
-  this->dataPtr->parts.Parse(_uri);
-}
-
-//////////////////////////////////////////////////
-Uri::Uri(const Uri &_uri)
-  : Uri(_uri.CanonicalUri())
-{
-}
-
-//////////////////////////////////////////////////
-Uri::Uri(const UriParts &_parts)
-  : dataPtr(new UriPrivate())
-{
-  this->dataPtr->parts = _parts;
-}
-
-//////////////////////////////////////////////////
-Uri::~Uri()
-{
-}
-
-//////////////////////////////////////////////////
-UriParts &Uri::Parts() const
-{
-  return this->dataPtr->parts;
-}
-
-//////////////////////////////////////////////////
-std::string Uri::CanonicalUri(const std::string &_param) const
-{
-  // Add the world part.
-  std::string canonicalUri = "/world/" + this->Parts().World();
-
-  // Add the nested entity part.
-  auto nestedEntity = this->Parts().Entity();
-  for (auto i = 0u; i < nestedEntity.EntityCount(); ++i)
+  auto to = _str.find("?", from);
+  if (to != std::string::npos)
   {
-    UriEntity entity = nestedEntity.Entity(i);
-    canonicalUri += "/" + entity.Type() + "/" + entity.Name();
+    // Update path.
+    path = _str.substr(from, to - from);
+
+    // Update the query.
+    query = _str.substr(to + 1);
   }
 
-  if (!_param.empty())
-  {
-    if (_param.find_first_of(" ?&=") != std::string::npos)
-      gzthrow("Incorrect parameter (' ', '?', '&', '=' not allowed");
+  URIPath newPath;
+  URIQuery newQuery;
 
-    // Add the parameter part.
-    canonicalUri += "?p=" + _param;
-  }
-  else
-  {
-    std::string param = this->Parts().Parameter();
-    if (!param.empty())
-      canonicalUri += "?p=" + param;
-  }
+  // Validate the path.
+  if (!URIPath::Valid(path, newPath))
+    return false;
 
-  return canonicalUri;
+  // Validate the query.
+  if (!URIQuery::Valid(query, newQuery))
+    return false;
+
+  _uri.Clear();
+  _uri.SetScheme(scheme);
+  _uri.Path() = newPath;
+  _uri.Query() = newQuery;
+  return true;
 }

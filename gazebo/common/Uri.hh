@@ -14,312 +14,261 @@
  * limitations under the License.
  *
 */
+
 #ifndef _GAZEBO_COMMON_URI_HH_
 #define _GAZEBO_COMMON_URI_HH_
 
 #include <memory>
 #include <string>
-#include <vector>
 #include "gazebo/util/system.hh"
+
+//#include "gazebo/util/system.hh"
 
 namespace gazebo
 {
   namespace common
   {
-    /// \addtogroup gazebo_common Common
-    /// \{
-
     // Forward declare private data classes.
-    class UriEntityPrivate;
-    class UriNestedEntityPrivate;
-    class UriPartsPrivate;
-    class UriPrivate;
+    class TokenizerPrivate;
+    class URIPathPrivate;
+    class URIQueryPrivate;
+    class URIPrivate;
 
-    /// \class UriEntity Uri.hh common/common.hh
-    /// \brief A URI entity abstraction.
-    ///
-    /// A URI entity is composed by a type and a name. The type is a keyword
-    /// such as "model" or "light" and the value is any alphanumeric identifier
-    /// without whitespaces, '?', '=' or '&'. A URI entity is part of a URI.
-    /// E.g.: /world/default/model/model_1/model/model_2?p=pose
-    ///                      ^^^^^^^^^^^^^^
-    /// "model/model_1" is a valid URI entity.
-    class GZ_COMMON_VISIBLE UriEntity
+    /// \brief A string tokenizer class.
+    /// Heavily inspired by http://www.songho.ca/misc/tokenizer/tokenizer.html
+    class GZ_COMMON_VISIBLE Tokenizer
     {
-      /// \brief Constructor.
-      public: UriEntity();
+      /// \brief Class constructor.
+      /// \param[in] _str A string argument.
+      public: Tokenizer(const std::string &_str);
 
-      /// \brief Constructor.
-      /// \param[in] _type Type of the URI entity. Any alphanumeric value
-      /// except ' ', '?', '&' or '=' is allowed. E.g.: "model"
-      /// \param[in] _name Name of the URI entity. Any alphanumeric value
-      /// except ' ', '?', '&' or '=' is allowed. E.g.: "model_1"
-      public: UriEntity(const std::string &_type,
-                        const std::string &_name);
+      /// \brief Class destructor.
+      public: ~Tokenizer() = default;
 
-      /// \brief Copy constructor.
-      /// \param[in] _entity Another entity.
-      public: UriEntity(const UriEntity &_entity);
+      /// \brief Splits the internal string into tokens.
+      /// \param[in] _delim Token delimiter.
+      /// \return Vector of tokens.
+      public: std::vector<std::string> Split(const std::string &_delim);
 
-      /// \brief Destructor.
-      public: virtual ~UriEntity();
+      /// \brief Get the next token.
+      /// \param[in] _delim Token delimiter.
+      /// \return The token or empty string if there are no more tokens.
+      private: std::string NextToken(const std::string &_delim);
 
-      /// \brief Get the URI entity type.
-      /// \return Type. E.g.: "model".
-      /// \sa SetType
-      public: std::string Type() const;
+      /// \brief Consume a delimiter if we are currently pointing to it.
+      /// \param[in] _delim Token delimiter.
+      private: void SkipDelimiter(const std::string &_delim);
 
-      /// \brief Get the URI entity name.
-      /// \return The name. E.g.: "model_1".
-      /// \sa SetName
-      public: std::string Name() const;
-
-      /// \brief Set the type of the URI entity. Any alphanumeric value
-      /// except ' ', '?', '&' or '=' is allowed. E.g.: "link"
-      /// \param[in] _type The type.
-      /// \throws common::Exception when _name contains an invalid character.
-      /// \sa Type
-      public: void SetType(const std::string &_type);
-
-      /// \brief Set the name of the URI entity. Any alphanumeric value
-      /// except ' ', '?', '&' or '=' is allowed.
-      /// \param[in] _name The name.
-      /// \throws common::Exception when _name contains an invalid character.
-      /// \sa Name
-      public: void SetName(const std::string &_name);
-
-      /// \brief Equal operator.
-      /// \param[in] _p another UriEntity.
-      /// \return itself.
-      public: UriEntity &operator=(const UriEntity &_p);
-
-      /// \brief Validate an identifier. Any alphanumeric value
-      /// except ' ', '?', '&' or '=' is valid.
-      /// \throws common::Exception when _name contains a whitespace or a "?".
-      private: void Validate(const std::string &_identifier);
+      /// \brief Return if a delimiter starts at a given position
+      /// \param[in] _delim Token delimiter.
+      /// \param[in] _currPos Position to check.
+      /// \return True when a delimiter starts at _pos.
+      private: bool IsDelimiter(const std::string &_delim,
+                                const size_t _pos) const;
 
       /// \internal
       /// \brief Pointer to private data.
-      private: std::unique_ptr<UriEntityPrivate> dataPtr;
+      private: std::unique_ptr<TokenizerPrivate> dataPtr;
     };
 
-    /// \class UriNestedEntity Uri.hh common/common.hh
-    /// \brief A URI nested entity abstraction.
-    ///
-    /// Some URI entities can be nested and contain URI child entities.
-    /// E.g.: A model is a URI entity and can contain another URI nested models.
-    /// The top level URI entity is the parent. The last URI entity is the leaf.
-    /// All the URI nested entities are stored in a linear way starting from the
-    /// parent and finishing with the leaf. A URI nested entity is part of a URI
-    /// E.g.: /world/default/model/model_1/model/model_2?p=pose
-    ///                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    /// "model/model_1/model/model_2" is a valid nested URI entity.
-    class GZ_COMMON_VISIBLE UriNestedEntity
+    /// \brief The path component of a URI
+    class GZ_COMMON_VISIBLE URIPath
     {
-      /// \brief Constructor.
-      public: UriNestedEntity();
+      /// \brief Constructor
+      public: URIPath();
 
       /// \brief Copy constructor.
-      /// \param[in] _entity Another nested entity.
-      public: UriNestedEntity(const UriNestedEntity &_entity);
+      /// \param[in] _path Another URIPath.
+      public: URIPath(const URIPath &_path);
 
-      /// \brief Destructor.
-      public: virtual ~UriNestedEntity();
+      /// \brief Construct a URIPath object from a string.
+      /// \param[in] _str A string.
+      public: URIPath(const std::string &_str);
 
-      /// \brief Number of URI nested entities.
-      /// \return The number of URI nested entities.
-      public: unsigned int EntityCount() const;
+      /// \brief Destructor
+      public: virtual ~URIPath();
 
-      /// \brief Get the parent URI entity.
-      /// \return The parent URI entity.
-      /// \throws common::Exception when the list of entities is empty.
-      public: UriEntity Parent() const;
+      /// \brief Parse a string and update the current path.
+      /// \param[in] _str A string containing a valid path.
+      /// \return True if the path was succesfully updated.
+      public: bool Load(const std::string &_str);
 
-      /// \brief Get the leaf URI entity.
-      /// \return The leaf URI entity.
-      /// \throws common::Exception when the list of URI entities is empty.
-      public: UriEntity Leaf() const;
-
-      /// \brief Get a specific URI nested entity.
-      /// \param[in] _index The position of the requested URI entity.
-      /// The parent has the 0 index and the leaf has the EntityCount() - 1.
-      /// \return The requested URI entity.
-      /// \throws common::Exception when _index >= EntityCount().
-      /// \sa EntityCount
-      public: UriEntity Entity(const unsigned int &_index) const;
-
-      /// \brief Adds a new URI entity. The new URI entity becomes the leaf.
-      /// \param[in] _entity New URI entity.
-      public: void AddEntity(const UriEntity &_entity);
-
-      /// \brief Adds a new URI entity. The new URI entity becomes the parent.
-      /// \param[in] _entity New URI entity.
-      public: void AddParentEntity(const UriEntity &_entity);
-
-      /// \brief Clear the list of URI entities stored in this object.
+      /// \brief Remove all parts of the path
       public: void Clear();
 
-      /// \brief Equal operator.
-      /// \param[in] _p another UriNestedEntity.
-      /// \return itself.
-      public: UriNestedEntity &operator=(const UriNestedEntity &_p);
+      /// \brief Push a new part onto the front of this path.
+      /// \param[in] _part Path part to push
+      public: void PushFront(const std::string &_part);
 
-      /// \internal
-      /// \brief Pointer to private data.
-      private: std::unique_ptr<UriNestedEntityPrivate> dataPtr;
-    };
+      /// \brief Push a new part onto the back of this path.
+      /// \param[in] _part Path part to push
+      /// \sa operator/
+      public: void PushBack(const std::string &_part);
 
-    /// \class UriParts Uri.hh common/common.hh
-    /// \brief Stores the components of a URI.
-    ///
-    /// There are multiple components in a URI:
-    ///
-    ///  - world:      URI entity with type "/world/". The name contains
-    ///                the name of a Gazebo world. E.g.:"/world/default"
-    ///
-    ///  - entities:   URI nested entity.
-    ///                E.g.: "model/model_1/model/model_2"
-    ///
-    ///  - parameter:  String representing a property of the entity.
-    ///                E.g.: "pose"
-    class GZ_COMMON_VISIBLE UriParts
-    {
-      /// \brief Constructor.
-      public: UriParts();
+      /// \brief Compound assignment operator.
+      /// \param[in] _part A new path to append.
+      /// \return A new Path that consists of "this / _part"
+      public: const URIPath &operator/=(const std::string &_part);
 
-      /// \brief Constructor.
-      /// \param[in] _uri A string that should be parsed into a UriParts object.
-      /// E.g.: "/world/default/model/model_1/link/link_1?p=pose".
-      /// \throws common::Exception when _uri cannot be correctly parsed.
-      public: UriParts(const std::string &_uri);
+      /// \brief Get the current path with the _part added to the end.
+      /// \param[in] _part Path part.
+      /// \return A new Path that consists of "this / _part"
+      /// \sa PushBack
+      public: const URIPath operator/(const std::string &_part) const;
 
-      /// \brief Copy constructor.
-      /// \param[in] _parts Another UriParts object.
-      public: UriParts(const UriParts &_parts);
+      /// \brief Return true if the two paths match.
+      /// \param[in] _part Path part.
+      /// return True of the paths match.
+      public: bool operator==(const URIPath &_path) const;
 
-      /// \brief Destructor.
-      public: virtual ~UriParts();
-
-      /// \brief Get the world part.
-      /// \return The world part.
-      /// \sa SetWorld
-      public: std::string World() const;
-
-      /// \brief Get the nested entity part.
-      /// \return The nested entity part.
-      /// \sa SetEntity
-      public: UriNestedEntity &Entity() const;
-
-      /// \brief Get the parameter part.
-      /// \return The parameter part.
-      /// \sa SetParameter
-      public: std::string Parameter() const;
-
-      /// \brief Set the world part.
-      /// \param[in] _world World part.
-      /// \sa World
-      public: void SetWorld(const std::string &_world);
-
-      /// \brief Set the nested entity part.
-      /// \param[in] _entity A nested entity.
-      /// \sa Entity
-      public: void SetEntity(const UriNestedEntity &_entity);
-
-      /// \brief Set the parameter part.
-      /// \param[in] _parameter Parameter part.
-      /// \sa Parameter
-      public: void SetParameter(const std::string &_parameter);
-
-      /// \brief Parse a URI string and update the internal URI parts.
-      /// \param[in] _uri A URI string.
-      ///                 E.g.: "/model/default/model/model_1"
-      /// \throws common::Exception when _uri cannot be correctly parsed.
-      public: void Parse(const std::string &_uri);
+      /// \brief Get the path as a string.
+      /// \param[in] _delim Delimiter used to separate each part of the path.
+      /// \return The path as a string, with each path part separated by _delim.
+      public: std::string Str(const std::string &_delim = "/") const;
 
       /// \brief Equal operator.
-      /// \param[in] _p another UriParts.
+      /// \param[in] _p another URIPath.
       /// \return itself.
-      public: UriParts &operator=(const UriParts &_p);
+      public: URIPath &operator=(const URIPath &_path);
 
-      /// \brief Update the URI nested entity part from an URI string.
-      /// \param[in] _uri A URI string.
-      /// \param[out] _next The next position after parsing the nested entity
-      ///                   part in the URI string.
-      /// \throws common::Exception when _uri cannot be correctly parsed.
-      private: void ParseEntity(const std::string &_uri,
-                                size_t &next);
-
-      /// \brief Update the parameter part from an URI string.
-      /// \param[in] _uri A URI string.
-      /// \param[in] _from Position of the first character to parse.
-      /// \throws common::Exception when _uri cannot be correctly parsed.
-      private: void ParseParameter(const std::string &_uri,
-                                   const size_t &_from);
-
-      /// \brief Parse one single entity from an URI string.
-      /// \param[in] _uri A URI string.
-      /// \param[in] _from Position of the first character to parse.
-      /// \param[out] _entity URI entity.
-      /// \return True when the URI entity was successfully parsed.
-      private: static bool ParseOneEntity(const std::string &_uri,
-                                          const size_t &_from,
-                                          UriEntity &_entity,
-                                          size_t &_next);
+      /// \brief Validate a string as URIPath.
+      /// \param[in] _str A string.
+      /// \return true if the string can be parsed as a URIPath.
+      public: static bool Valid(const std::string &_str,
+                                URIPath &_path);
 
       /// \internal
       /// \brief Pointer to private data.
-      private: std::unique_ptr<UriPartsPrivate> dataPtr;
+      private: std::unique_ptr<URIPathPrivate> dataPtr;
     };
 
-    /// \class Uri Uri.hh common/common.hh
-    /// \brief A Gazebo URI abstraction.
-    ///
-    /// A Uri is a string representing an entity in a given world. The URI
-    /// string contains information of the world name where is contained and
-    /// its hierarchy of entities. Optionally, it can also contain a parameter
-    /// that should be interpreted as a property of the entity.
-    /// E.g.: "/world/default/model/model_1/link/link_1?p=pose".
-    /// This is a valid URI representing the pose of a link "link_1" that is
-    /// part of a model named "model_1" contained in the "default" world.
-    class GZ_COMMON_VISIBLE Uri
+    /// \brief The query component of a URI
+    class GZ_COMMON_VISIBLE URIQuery
     {
-      /// \brief Constructor.
-      /// \param[in] _uri A URI string.
-      public: Uri(const std::string &_uri);
+      /// \brief Constructor
+      public: URIQuery();
 
-      /// \brief Constructor.
-      /// \param[in] _parts Individual parts of the URI.
-      public: Uri(const UriParts &_parts);
+      /// \brief Construct a URIQuery object from a string.
+      /// \param[in] _str A string.
+      public: URIQuery(const std::string &_str);
 
-      /// \brief Copy constructor.
-      /// \param[in] _uri Another Uri object.
-      public: Uri(const Uri &_uri);
+      /// \brief Copy constructor
+      /// \param[in] _query Another query component
+      public: URIQuery(const URIQuery &_query);
+
+      /// \brief Destructor
+      public: virtual ~URIQuery();
+
+      /// \brief Parse a string and update the current path.
+      /// \param[in] _str A string containing a valid path.
+      /// \return True if the path was succesfully updated.
+      public: bool Load(const std::string &_str);
+
+      /// \brief Remove all values of the query
+      public: void Clear();
+
+      /// \brief Get this query with a new _key=_value pair added.
+      /// \param[in] _key Key of the query.
+      /// \param[in] _value Value of the query.
+      /// \return This query with the additional _key = _value pair
+      public: const URIQuery Insert(const std::string &_key,
+                                    const std::string &_value);
+
+      /// \brief Equal operator.
+      /// \param[in] _p another URIQuery.
+      /// \return itself.
+      public: URIQuery &operator=(const URIQuery &_query);
+
+      /// \brief Return true if the two queries contain the same values.
+      /// \param[in] _query A URI query to compare.
+      /// return True of the queries match.
+      public: bool operator==(const URIQuery &_query) const;
+
+      /// \brief Get the query as a string.
+      /// \param[in] _delim Delimiter used to separate each tuple of the query.
+      /// \return The query as a string, with each key,value pair separated by
+      /// _delim.
+      public: std::string Str(const std::string &_delim = "&") const;
+
+      /// \brief Validate a string as URIQuery.
+      /// \param[in] _str A string.
+      /// \return true if the string can be parsed as a URIQuery.
+      public: static bool Valid(const std::string &_str,
+                                URIQuery &_query);
+
+      /// \internal
+      /// \brief Pointer to private data.
+      private: std::unique_ptr<URIQueryPrivate> dataPtr;
+    };
+
+    /// \brief A complete URI
+    class GZ_COMMON_VISIBLE URI
+    {
+      /// \brief Default constructor
+      public: URI();
+
+      /// \brief Construct a URI object from a string.
+      /// \param[in] _str A string.
+      public: URI(const std::string &_str);
+
+      /// \brief Copy constructor
+      /// \param[in] _uri Another URI.
+      public: URI(const URI &_uri);
 
       /// \brief Destructor.
-      public: virtual ~Uri();
+      public: ~URI();
 
-      /// \brief Get the parts of the current URI.
-      /// \return The parts in which this URI is composed.
-      public: UriParts &Parts() const;
+      /// \brief Parse a string and update the current path.
+      /// \param[in] _str A string containing a valid path.
+      /// \return True if the path was succesfully updated.
+      public: bool Load(const std::string &_str);
 
-      /// \brief Get the URI string of the current URI.
-      /// E.g.: "/world/default/model/model_1/link/link_1?p=pose"
-      /// Optionally, it's possible to pass a parameter that specifies an
-      /// alternative property. In this case, this parameter will be contained
-      /// in the URI string returned and the internal parameter stored in the
-      /// URI object will be ignored.
-      /// E.g.: Passing a "lin_vel" parameter returns the following URI string:
-      /// "/world/default/model/model_1/link/link_1?p=lin_vel".
-      /// \param[in] _param Optional parameter.
-      /// \return The URI string.
-      /// E.g.: "/world/default/model/model_1/link/link_1?p=pose"
-      public: std::string CanonicalUri(const std::string &_param = "") const;
+      /// \brief Get the URI as a string, which has the form:
+      ///
+      /// scheme://path?query
+      ///
+      /// \return The full URI as a string
+      public: std::string Str() const;
+
+      /// \brief Remove all components of the URI
+      public: void Clear();
+
+      /// \brief Get the URI's scheme
+      /// \return The scheme
+      public: std::string Scheme() const;
+
+      /// \brief Set the URI's scheme
+      /// \param[in] _scheme New scheme.
+      public: void SetScheme(const std::string &_scheme);
+
+      /// \brief Get a mutable version of the path component
+      /// \return A reference to the path
+      public: URIPath &Path();
+
+      /// \brief Get a mutable version of the query component
+      /// \return A reference to the query
+      public: URIQuery &Query();
+
+      /// \brief Equal operator.
+      /// \param[in] _uri another URI.
+      /// \return itself.
+      public: URI &operator=(const URI &_uri);
+
+      /// \brief Return true if the two URIs match.
+      /// \param[in] _uri another URI to compare.
+      /// \return true if the two URIs match.
+      public: bool operator==(const URI &_uri) const;
+
+      /// \brief Validate a string as URI.
+      /// \param[in] _str A string.
+      /// \return true if the string can be parsed as a URI.
+      public: static bool Valid(const std::string &_str,
+                                URI &_uri);
 
       /// \internal
       /// \brief Pointer to private data.
-      private: std::unique_ptr<UriPrivate> dataPtr;
+      private: std::unique_ptr<URIPrivate> dataPtr;
     };
-    /// \}
   }
 }
 #endif

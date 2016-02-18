@@ -15,480 +15,243 @@
  *
 */
 
-#include <algorithm>
 #include <gtest/gtest.h>
-
 #include "gazebo/common/Exception.hh"
-#include "gazebo/common/Uri.hh"
+#include "gazebo/common/URI.hh"
 
 using namespace gazebo;
 using namespace common;
 
 /////////////////////////////////////////////////
-TEST(UriTest, UriEntityInvalid)
+TEST(URITEST, URIPath)
 {
-  EXPECT_THROW(UriEntity().SetName("_wrong id_"), Exception);
-  EXPECT_THROW(UriEntity().SetName("_wrong?id_"), Exception);
-  EXPECT_THROW(UriEntity().SetName("_wrong=id_"), Exception);
-  EXPECT_THROW(UriEntity().SetName("_wrong&id_"), Exception);
-  EXPECT_THROW(UriEntity().SetType("_wrong id_"), Exception);
-  EXPECT_THROW(UriEntity().SetType("_wrong?id_"), Exception);
-  EXPECT_THROW(UriEntity().SetType("_wrong=id_"), Exception);
-  EXPECT_THROW(UriEntity().SetType("_wrong&id_"), Exception);
+  URIPath path1, path2, path3;
+  EXPECT_TRUE(path1.Str().empty());
 
-  EXPECT_THROW(UriEntity("_wrong id_", "name"), Exception);
-  EXPECT_THROW(UriEntity("type", "_wrong id_"), Exception);
+  path1.PushFront("part1");
+  EXPECT_EQ(path1.Str(), "part1");
+  path1.PushBack("part2");
+  EXPECT_EQ(path1.Str(), "part1/part2");
+  path1.PushFront("part0");
+  EXPECT_EQ(path1.Str(), "part0/part1/part2");
+
+  path2 = path1 / "part0";
+  EXPECT_EQ(path2.Str(), "part0");
+
+  //path2 /= "part1" / "part2";
+  //EXPECT_EQ(path2.Str(), "part0/part1/part2");
+
+  EXPECT_TRUE(path1 == path2);
+
+  path3 = path1;
+  EXPECT_TRUE(path3 == path1);
+
+  path1.Clear();
+  EXPECT_TRUE(path1.Str().empty());
+
+  URIPath path4(path3);
+  EXPECT_TRUE(path4 == path3);
 }
 
 /////////////////////////////////////////////////
-TEST(UriTest, UriEntity)
+TEST(URITEST, URIPathString)
 {
-  // Accessors.
-  UriEntity entity1, entity2;
-  entity1.SetType("type1");
-  EXPECT_EQ(entity1.Type(), "type1");
-  entity1.SetName("name1");
-  EXPECT_EQ(entity1.Name(), "name1");
+  URIPath path;
+  EXPECT_FALSE(URIPath::Valid("", path));
+  EXPECT_FALSE(URIPath::Valid("//", path));
+  EXPECT_FALSE(URIPath::Valid(" ", path));
+  EXPECT_FALSE(URIPath::Valid("?invalid", path));
+  EXPECT_FALSE(URIPath::Valid("=invalid", path));
+  EXPECT_FALSE(URIPath::Valid("&invalid", path));
+  EXPECT_TRUE(URIPath::Valid("part1", path));
+  EXPECT_TRUE(URIPath::Valid("/part1", path));
+  EXPECT_TRUE(URIPath::Valid("/part1/", path));
+  EXPECT_TRUE(URIPath::Valid("/part1/part2", path));
+  EXPECT_TRUE(URIPath::Valid("/part1/part2/", path));
 
-  // Constructor.
-  UriEntity entity3("type3", "name3");
-  EXPECT_EQ(entity3.Type(), "type3");
-  EXPECT_EQ(entity3.Name(), "name3");
+  EXPECT_FALSE(path.Load(""));
+  EXPECT_FALSE(path.Load("//"));
+  EXPECT_FALSE(path.Load(" "));
+  EXPECT_FALSE(path.Load("?invalid"));
+  EXPECT_FALSE(path.Load("=invalid"));
+  EXPECT_FALSE(path.Load("&invalid"));
+  EXPECT_TRUE(path.Load("part1"));
+  EXPECT_TRUE(path.Load("/part1"));
+  EXPECT_TRUE(path.Load("/part1/"));
+  EXPECT_TRUE(path.Load("/part1/part2"));
+  EXPECT_TRUE(path.Load("/part1/part2/"));
 
-  // This should make a copy.
-  entity2 = entity1;
-
-  // Modify entity1 to make sure that entity2 does not change.
-  entity1.SetType("modified_type1");
-  entity1.SetName("modified_name1");
-
-  EXPECT_EQ(entity2.Type(), "type1");
-  EXPECT_EQ(entity2.Name(), "name1");
-
-  // Copy constructor;
-  UriEntity entity4(entity2);
-  EXPECT_EQ(entity4.Type(), "type1");
-  EXPECT_EQ(entity4.Name(), "name1");
+  EXPECT_THROW(URIPath(""), Exception);
+  EXPECT_THROW(URIPath("//"), Exception);
+  EXPECT_THROW(URIPath(" "), Exception);
+  EXPECT_THROW(URIPath("?invalid"), Exception);
+  EXPECT_THROW(URIPath("=invalid"), Exception);
+  EXPECT_THROW(URIPath("&invalid"), Exception);
+  EXPECT_NO_THROW(URIPath("part1"));
+  EXPECT_NO_THROW(URIPath("/part1"));
+  EXPECT_NO_THROW(URIPath("/part1/"));
+  EXPECT_NO_THROW(URIPath("/part1/part2"));
+  EXPECT_NO_THROW(URIPath("/part1/part2/"));
 }
 
 /////////////////////////////////////////////////
-TEST(UriTest, UriNestedEntity)
+TEST(URITEST, URIQuery)
 {
-  // Populate some entities.
-  UriEntity entity, entity1, entity2, entity3;
+  URIQuery query1, query2, query3;
+  EXPECT_TRUE(query1.Str().empty());
 
-  entity1.SetType("type1");
-  entity1.SetName("name1");
-  entity2.SetType("type2");
-  entity2.SetName("name2");
-  entity3.SetType("type3");
-  entity3.SetName("name3");
+  query1.Insert("key1", "value1");
+  EXPECT_EQ(query1.Str(), "?key1=value1");
+  query1.Insert("key2", "value2");
+  EXPECT_EQ(query1.Str(), "?key1=value1&key2=value2");
 
-  UriNestedEntity nestedEntity;
-  EXPECT_EQ(nestedEntity.EntityCount(), 0u);
+  query2 = query1;
+  EXPECT_EQ(query2.Str(), query1.Str());
+  EXPECT_TRUE(query2 == query1);
 
-  // Trying to get an entity when nestedEntity is empty.
-  EXPECT_THROW(nestedEntity.Parent(), Exception);
-  EXPECT_THROW(nestedEntity.Leaf(), Exception);
-  EXPECT_THROW(nestedEntity.Entity(0), Exception);
+  query3 = query1;
+  EXPECT_TRUE(query3 == query1);
 
-  // Add the entities to a NestedEntity.
-  nestedEntity.AddEntity(entity1);
-  nestedEntity.AddEntity(entity2);
-  nestedEntity.AddEntity(entity3);
+  query1.Clear();
+  EXPECT_TRUE(query1.Str().empty());
 
-  entity = nestedEntity.Parent();
-  EXPECT_EQ(entity.Type(), "type1");
-  EXPECT_EQ(entity.Name(), "name1");
-
-  entity = nestedEntity.Leaf();
-  EXPECT_EQ(entity.Type(), "type3");
-  EXPECT_EQ(entity.Name(), "name3");
-
-  EXPECT_EQ(nestedEntity.EntityCount(), 3u);
-
-  EXPECT_THROW(nestedEntity.Entity(3), Exception);
-  entity = nestedEntity.Entity(1);
-  EXPECT_EQ(entity.Type(), "type2");
-  EXPECT_EQ(entity.Name(), "name2");
-
-  // This should create a copy.
-  UriNestedEntity nestedEntity2 = nestedEntity;
-
-  nestedEntity.Clear();
-  EXPECT_EQ(nestedEntity.EntityCount(), 0u);
-
-  entity = nestedEntity2.Parent();
-  EXPECT_EQ(entity.Type(), "type1");
-  EXPECT_EQ(entity.Name(), "name1");
-  entity = nestedEntity2.Leaf();
-  EXPECT_EQ(entity.Type(), "type3");
-  EXPECT_EQ(entity.Name(), "name3");
-
-  // Copy constructor.
-  UriNestedEntity nestedEntity3(nestedEntity2);
-  nestedEntity2.Clear();
-
-  entity = nestedEntity3.Parent();
-  EXPECT_EQ(entity.Type(), "type1");
-  EXPECT_EQ(entity.Name(), "name1");
-  entity = nestedEntity3.Leaf();
-  EXPECT_EQ(entity.Type(), "type3");
-  EXPECT_EQ(entity.Name(), "name3");
+  URIQuery query4(query2);
+  EXPECT_TRUE(query4 == query2);
 }
 
 /////////////////////////////////////////////////
-TEST(UriTest, UriPartsInvalid)
+TEST(URITEST, URIQueryString)
 {
-  // Empty.
-  EXPECT_THROW(UriParts(""), Exception);
-  EXPECT_THROW(UriParts().Parse(""), Exception);
-  // Empty.
-  EXPECT_THROW(UriParts("/"), Exception);
-  EXPECT_THROW(UriParts().Parse("/"), Exception);
-  // Invalid world keyword.
-  EXPECT_THROW(UriParts("/wor/default/link/link1"), Exception);
-  EXPECT_THROW(UriParts().Parse("/wor/default/link/link1"), Exception);
-  // No world name.
-  EXPECT_THROW(UriParts("/world"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world"), Exception);
-  // Invalid world name.
-  EXPECT_THROW(UriParts("/world/ default/link/link1"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/ default/link/link1"), Exception);
-  // Invalid world name.
-  EXPECT_THROW(UriParts("/world/?default/link/link1"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/?default/link/link1"), Exception);
-  // Invalid world name.
-  EXPECT_THROW(UriParts("/world/=default/link/link1"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/=default/link/link1"), Exception);
-  // Invalid world name.
-  EXPECT_THROW(UriParts("/world/&default/link/link1"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/&default/link/link1"), Exception);
-  // No entity name.
-  EXPECT_THROW(UriParts("/world/default/link"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link"), Exception);
-  // No entity name.
-  EXPECT_THROW(UriParts("/world/default/link/"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/"), Exception);
-  // Invalid entity type.
-  EXPECT_THROW(UriParts("/world/default/ link/link_1"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/ link/link_1"), Exception);
-  // Invalid entity type.
-  EXPECT_THROW(UriParts("/world/default/?link/link_1"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/?link/link_1"), Exception);
-  // Invalid entity type.
-  EXPECT_THROW(UriParts("/world/default/=link/link_1"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/=link/link_1"), Exception);
-  // Invalid entity type.
-  EXPECT_THROW(UriParts("/world/default/&link/link_1"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/&link/link_1"), Exception);
-  // Invalid entity name.
-  EXPECT_THROW(UriParts("/world/default/link/ link_1"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/ link_1"), Exception);
-  // empty entity name.
-  EXPECT_THROW(UriParts("/world/default/link/?link_1"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/?link_1"), Exception);
-  // Invalid entity name.
-  EXPECT_THROW(UriParts("/world/default/link/=link_1"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/=link_1"), Exception);
-  // Invalid entity name.
-  EXPECT_THROW(UriParts("/world/default/link/&link_1"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/&link_1"), Exception);
-  // Invalid entity name.
-  EXPECT_THROW(UriParts("/world/default/link/l1/link/ l2"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1/link/ l2"), Exception);
-  // empty entity name.
-  EXPECT_THROW(UriParts("/world/default/link/l1/link/?l2"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1/link/?l2"), Exception);
-  // Invalid entity name.
-  EXPECT_THROW(UriParts("/world/default/link/l1/link/=l2"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1/link/=l2"), Exception);
-  // Invalid entity name.
-  EXPECT_THROW(UriParts("/world/default/link/l1/link/&l2"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1/link/&l2"), Exception);
-  // Invalid parameter.
-  EXPECT_THROW(UriParts("/world/default/link/l1=pose"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1=pose"), Exception);
-  // Invalid parameter (extra '/').
-  EXPECT_THROW(UriParts("/world/default/link/l1/?p=pose"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1/?p=pose"), Exception);
-  // Invalid parameter (no '=').
-  EXPECT_THROW(UriParts("/world/default/link/l1?p"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1?p"), Exception);
-  // Invalid parameter (no value).
-  EXPECT_THROW(UriParts("/world/default/link/l1?p="), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1?p="), Exception);
-  // Invalid parameter name.
-  EXPECT_THROW(UriParts("/world/default/link/l1??p=pose"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1??p=pose"), Exception);
-  // Invalid parameter name.
-  EXPECT_THROW(UriParts("/world/default/link/l1? p=pose"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1? p=pose"), Exception);
-  // Invalid parameter name.
-  EXPECT_THROW(UriParts("/world/default/link/l1?=p=pose"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1?=p=pose"), Exception);
-  // Invalid parameter name.
-  EXPECT_THROW(UriParts("/world/default/link/l1?&p=pose"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1?&p=pose"), Exception);
-  // Invalid parameter value.
-  EXPECT_THROW(UriParts("/world/default/link/l1?p= pose"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1?p= pose"), Exception);
-  // Invalid parameter value.
-  EXPECT_THROW(UriParts("/world/default/link/l1?p=?pose"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1?p=?pose"), Exception);
-  // Invalid parameter value.
-  EXPECT_THROW(UriParts("/world/default/link/l1?p==pose"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1?p==pose"), Exception);
-  // Invalid parameter value.
-  EXPECT_THROW(UriParts("/world/default/link/l1?p=&pose"), Exception);
-  EXPECT_THROW(UriParts().Parse("/world/default/link/l1?p=&pose"), Exception);
+  URIQuery query;
+  EXPECT_FALSE(URIQuery::Valid("??", query));
+  EXPECT_FALSE(URIQuery::Valid("invalid?", query));
+  EXPECT_FALSE(URIQuery::Valid("?invalid?", query));
+  EXPECT_FALSE(URIQuery::Valid("? invalid", query));
+  EXPECT_FALSE(URIQuery::Valid("?key", query));
+  EXPECT_FALSE(URIQuery::Valid("?key=", query));
+  EXPECT_FALSE(URIQuery::Valid("?=value", query));
+  EXPECT_FALSE(URIQuery::Valid("?key=value", query));
+
+  EXPECT_TRUE(URIQuery::Valid("", query));
+  EXPECT_TRUE(URIQuery::Valid("?key=value", query));
+  EXPECT_TRUE(URIQuery::Valid("?key=value&key2=value2", query));
+
+  EXPECT_FALSE(query.Load("??"));
+  EXPECT_FALSE(query.Load("invalid?"));
+  EXPECT_FALSE(query.Load("?invalid?"));
+  EXPECT_FALSE(query.Load("? invalid"));
+  EXPECT_FALSE(query.Load("?key"));
+  EXPECT_FALSE(query.Load("?key="));
+  EXPECT_FALSE(query.Load("?=value"));
+  EXPECT_FALSE(query.Load("?key=value"));
+
+  EXPECT_TRUE(query.Load(""));
+  EXPECT_TRUE(query.Load("?key=value"));
+  EXPECT_TRUE(query.Load("?key=value&key2=value2"));
+
+  EXPECT_THROW(URIQuery("??"), Exception);
+  EXPECT_THROW(URIQuery("invalid?"), Exception);
+  EXPECT_THROW(URIQuery("?invalid?"), Exception);
+  EXPECT_THROW(URIQuery("? invalid"), Exception);
+  EXPECT_THROW(URIQuery("?key"), Exception);
+  EXPECT_THROW(URIQuery("?key="), Exception);
+  EXPECT_THROW(URIQuery("?=value"), Exception);
+  EXPECT_THROW(URIQuery("?key=value"), Exception);
+
+  EXPECT_NO_THROW(URIQuery(""));
+  EXPECT_NO_THROW(URIQuery("?key=value"));
+  EXPECT_NO_THROW(URIQuery("?key=value&key2=value2"));
 }
 
 /////////////////////////////////////////////////
-TEST(UriTest, UriPartsStringConstructors)
+TEST(URITEST, Scheme)
 {
-  // Constructors and Parse() using a URI string.
-  EXPECT_NO_THROW(UriParts("/world/default"));
-  EXPECT_NO_THROW(UriParts().Parse("/world/default"));
-  EXPECT_NO_THROW(UriParts("/world/default/"));
-  EXPECT_NO_THROW(UriParts().Parse("/world/default/"));
-  EXPECT_NO_THROW(UriParts("/world/default?p=time"));
-  EXPECT_NO_THROW(UriParts().Parse("/world/default?p=time"));
-  EXPECT_NO_THROW(UriParts("/world/default/link/link1"));
-  EXPECT_NO_THROW(UriParts().Parse("/world/default/link/link1"));
-  EXPECT_NO_THROW(UriParts("/world/default/link/l1/link/l2"));
-  EXPECT_NO_THROW(UriParts().Parse("/world/default/link/l1/link/l2"));
-  EXPECT_NO_THROW(UriParts("/world/default/link/link1?p=pose"));
-  EXPECT_NO_THROW(UriParts().Parse("/world/default/link/link1?p=pose"));
-  EXPECT_NO_THROW(UriParts("/world/default/link/l1/link/l2?p=pose"));
-  EXPECT_NO_THROW(UriParts().Parse("/world/default/link/l1/link/l2?p=pose"));
-  EXPECT_NO_THROW(UriParts("/world/default/link/link1/"));
-  EXPECT_NO_THROW(UriParts().Parse("/world/default/link/link1/"));
-  EXPECT_NO_THROW(UriParts("/world/default/link/l1/link/l2/"));
-  EXPECT_NO_THROW(UriParts().Parse("/world/default/link/l1/link/l2/"));
-  EXPECT_NO_THROW(UriParts("/world/default/link/link1?p=pose/"));
-  EXPECT_NO_THROW(UriParts().Parse("/world/default/link/link1?p=pose/"));
-  EXPECT_NO_THROW(UriParts("/world/default/link/l1/link/l2?p=pose/"));
-  EXPECT_NO_THROW(UriParts().Parse("/world/default/link/l1/link/l2?p=pose/"));
+  URI uri;
+  EXPECT_TRUE(uri.Str().empty());
+
+  uri.SetScheme("data");
+  EXPECT_EQ(uri.Str(), "data://");
 }
 
 /////////////////////////////////////////////////
-TEST(UriTest, UriParts)
+TEST(URITEST, Path)
 {
-  // Populate some URI entities.
-  UriEntity entity, entity1, entity2, entity3;
+  URI uri;
+  uri.SetScheme("data");
 
-  entity1.SetType("type1");
-  entity1.SetName("name1");
-  entity2.SetType("type2");
-  entity2.SetName("name2");
-  entity3.SetType("type3");
-  entity3.SetName("name3");
+  uri.Path() = uri.Path() / "world";
+  EXPECT_EQ(uri.Str(), "data://world");
 
-  // Add the entities to a NestedEntity.
-  UriNestedEntity nestedEntity;
-  nestedEntity.AddEntity(entity1);
-  nestedEntity.AddEntity(entity2);
-  nestedEntity.AddEntity(entity3);
-
-  UriParts uriParts;
-
-  uriParts.SetWorld("world1");
-  uriParts.SetEntity(nestedEntity);
-  uriParts.SetParameter("param1");
-
-  EXPECT_EQ(uriParts.World(), "world1");
-  auto nestedEntity2 = uriParts.Entity();
-  EXPECT_EQ(nestedEntity2.Parent().Type(), "type1");
-  EXPECT_EQ(nestedEntity2.Parent().Name(), "name1");
-  EXPECT_EQ(nestedEntity2.Leaf().Type(), "type3");
-  EXPECT_EQ(nestedEntity2.Leaf().Name(), "name3");
-  auto p = uriParts.Parameter();
-  EXPECT_EQ(p, "param1");
-
-  // Copy constructor.
-  UriParts uriParts2(uriParts);
-
-  // Modify uriparPs to make sure that uriParts2 does not change.
-  uriParts.SetWorld("modified_world1");
-  uriParts.Entity().Clear();
-  uriParts.SetParameter("");
-
-  EXPECT_EQ(uriParts2.World(), "world1");
-  nestedEntity = uriParts2.Entity();
-  EXPECT_EQ(nestedEntity.Parent().Type(), "type1");
-  EXPECT_EQ(nestedEntity.Parent().Name(), "name1");
-  EXPECT_EQ(nestedEntity.Leaf().Type(), "type3");
-  EXPECT_EQ(nestedEntity.Leaf().Name(), "name3");
-  p = uriParts2.Parameter();
-  EXPECT_EQ(p, "param1");
-
-  // Assignment operator.
-  EXPECT_EQ(uriParts.Entity().EntityCount(), 0u);
-  EXPECT_TRUE(uriParts.Parameter().empty());
-
-  uriParts = uriParts2;
-
-  // Modify uriParts2 to make sure that uriParts does not change.
-  uriParts2.SetWorld("modified_world1");
-  uriParts2.Entity().Clear();
-  uriParts2.SetParameter("");
-
-  EXPECT_EQ(uriParts.World(), "world1");
-  nestedEntity = uriParts.Entity();
-  EXPECT_EQ(nestedEntity.Parent().Type(), "type1");
-  EXPECT_EQ(nestedEntity.Parent().Name(), "name1");
-  EXPECT_EQ(nestedEntity.Leaf().Type(), "type3");
-  EXPECT_EQ(nestedEntity.Leaf().Name(), "name3");
-  p = uriParts.Parameter();
-  EXPECT_EQ(p, "param1");
+  uri.Path() /= "default";
+  EXPECT_EQ(uri.Str(), "data://world/default");
 }
 
 /////////////////////////////////////////////////
-TEST(UriTest, UriInvalid)
+TEST(URITEST, Query)
 {
-  // Missing /world
-  EXPECT_THROW(Uri("/def/model/model_1"), Exception);
-  // Missing /world
-  EXPECT_THROW(Uri("/incorrect/def/model/model_1/"), Exception);
-  // Missing entity name
-  EXPECT_THROW(Uri("/world/def/model"), Exception);
-  // Missing entity name
-  EXPECT_THROW(Uri("/world/def/model/"), Exception);
-  // Wrong entity name (white space)
-  EXPECT_THROW(Uri("/world/def/model/ "), Exception);
-  // Invalid '/' before the parameter list.
-  EXPECT_THROW(Uri("/world/def/model/model_1/p=pose"), Exception);
-  // Missing ? in parameter list.
-  EXPECT_THROW(Uri("/world/def/model/model_1p=pose"), Exception);
-  // Invalid '/' before the parameter list.
-  EXPECT_THROW(Uri("/world/def/model/model_1/?pose"), Exception);
-  // Missing = in parameter list.
-  EXPECT_THROW(Uri("/world/def/model/model_1?pose"), Exception);
-  // Invalid '/' before the parameter list.
-  EXPECT_THROW(Uri("/world/def/model/model_1/?p="), Exception);
-  // Missing right argument after "=" in parameter list.
-  EXPECT_THROW(Uri("/world/def/model/model_1?p="), Exception);
-  // Invalid entity name (contains '=').
-  EXPECT_THROW(Uri("/world/def/model/model_1p=pose"), Exception);
-  // Missing part of the parameter.
-  EXPECT_THROW(Uri("/world/def/model/model_1p&pose"), Exception);
-  // Invalid entity name (contains '=').
-  EXPECT_THROW(Uri("/world/def/model/model_1p?pose"), Exception);
-  // Invalid parameter name (contains '&').
-  EXPECT_THROW(Uri("/world/def/model/model_1?p=pose&p=lin_vel"), Exception);
+  URI uri;
+  uri.SetScheme("data");
+
+  uri.Query().Insert("p", "v");
+  EXPECT_EQ(uri.Str(), "data://?p=v");
+
+  uri.Path().PushFront("default");
+  EXPECT_EQ(uri.Str(), "data://default?p=v");
+
+  uri.Path().PushFront("world");
+  EXPECT_EQ(uri.Str(), "data://world/default?p=v");
+
+  URI uri2 = uri;
+
+  uri.Path().Clear();
+  EXPECT_EQ(uri.Str(), "data://?p=v");
+
+  uri.Query().Clear();
+  EXPECT_EQ(uri.Str(), "data://");
+
+  uri.Clear();
+  uri2.Clear();
+  EXPECT_EQ(uri, uri2);
 }
 
 /////////////////////////////////////////////////
-TEST(UriTest, UriStringConstructor)
+TEST(URITEST, URIString)
 {
-  Uri uri1("/world/def/model/model_1");
-  auto parts = uri1.Parts();
-  EXPECT_EQ(parts.World(), "def");
-  UriEntity entity = parts.Entity().Parent();
-  EXPECT_EQ(entity.Type(), "model");
-  EXPECT_EQ(entity.Name(), "model_1");
-  EXPECT_EQ(uri1.CanonicalUri(), "/world/def/model/model_1");
-  EXPECT_EQ(uri1.CanonicalUri("pose"), "/world/def/model/model_1?p=pose");
+  URI uri;
+  EXPECT_FALSE(URI::Valid("", uri));
+  EXPECT_FALSE(URI::Valid("scheme", uri));
+  EXPECT_FALSE(URI::Valid("scheme://", uri));
+  EXPECT_FALSE(URI::Valid("scheme://?key=value", uri));
+  EXPECT_FALSE(URI::Valid("scheme://part1?keyvalue", uri));
+  EXPECT_TRUE(URI::Valid("scheme://part1", uri));
+  EXPECT_TRUE(URI::Valid("scheme://part1/part2", uri));
+  EXPECT_TRUE(URI::Valid("scheme://part1?key=value", uri));
+  EXPECT_TRUE(URI::Valid("scheme://part1/part2?k1=v1&k2=v2", uri));
 
-  Uri uri2("/world/def/model/model_1/");
-  parts = uri2.Parts();
-  EXPECT_EQ(parts.World(), "def");
-  entity = parts.Entity().Parent();
-  EXPECT_EQ(entity.Type(), "model");
-  EXPECT_EQ(entity.Name(), "model_1");
-  EXPECT_EQ(uri2.CanonicalUri(), "/world/def/model/model_1");
-  EXPECT_EQ(uri2.CanonicalUri("pose"), "/world/def/model/model_1?p=pose");
+  EXPECT_FALSE(uri.Load(""));
+  EXPECT_FALSE(uri.Load("scheme"));
+  EXPECT_FALSE(uri.Load("scheme://"));
+  EXPECT_FALSE(uri.Load("scheme://?key=value"));
+  EXPECT_FALSE(uri.Load("scheme://part1?keyvalue"));
+  EXPECT_TRUE(uri.Load("scheme://part1"));
+  EXPECT_TRUE(uri.Load("scheme://part1/part2"));
+  EXPECT_TRUE(uri.Load("scheme://part1?key=value"));
+  EXPECT_TRUE(uri.Load("scheme://part1/part2?k1=v1&k2=v2"));
 
-  Uri uri3("/world/def/model/model_1/model/model_2");
-  parts = uri3.Parts();
-  EXPECT_EQ(parts.World(), "def");
-  entity = parts.Entity().Parent();
-  EXPECT_EQ(entity.Type(), "model");
-  EXPECT_EQ(entity.Name(), "model_1");
-  entity = parts.Entity().Leaf();
-  EXPECT_EQ(entity.Type(), "model");
-  EXPECT_EQ(entity.Name(), "model_2");
-  EXPECT_EQ(uri3.CanonicalUri(), "/world/def/model/model_1/model/model_2");
-  EXPECT_EQ(uri3.CanonicalUri("pose"),
-      "/world/def/model/model_1/model/model_2?p=pose");
-
-  Uri uri4("/world/def/model/model_1/model/model_2/");
-  parts = uri4.Parts();
-  EXPECT_EQ(parts.World(), "def");
-  entity = parts.Entity().Parent();
-  EXPECT_EQ(entity.Type(), "model");
-  EXPECT_EQ(entity.Name(), "model_1");
-  entity = parts.Entity().Leaf();
-  EXPECT_EQ(entity.Type(), "model");
-  EXPECT_EQ(entity.Name(), "model_2");
-  EXPECT_EQ(uri4.CanonicalUri(), "/world/def/model/model_1/model/model_2");
-  EXPECT_EQ(uri4.CanonicalUri("pose"),
-      "/world/def/model/model_1/model/model_2?p=pose");
-
-  Uri uri5("/world/def/model/model_1?p=pose");
-  parts = uri5.Parts();
-  EXPECT_EQ(parts.World(), "def");
-  entity = parts.Entity().Parent();
-  EXPECT_EQ(entity.Type(), "model");
-  EXPECT_EQ(entity.Name(), "model_1");
-  EXPECT_EQ(uri5.CanonicalUri(), "/world/def/model/model_1?p=pose");
-  EXPECT_EQ(uri5.CanonicalUri("lin_vel"),
-      "/world/def/model/model_1?p=lin_vel");
-
-  Uri uri6("/world/def/model/model_1/model/model_2?p=pose/pos/x");
-  parts = uri6.Parts();
-  EXPECT_EQ(parts.World(), "def");
-  entity = parts.Entity().Parent();
-  EXPECT_EQ(entity.Type(), "model");
-  EXPECT_EQ(entity.Name(), "model_1");
-  entity = parts.Entity().Leaf();
-  EXPECT_EQ(entity.Type(), "model");
-  EXPECT_EQ(entity.Name(), "model_2");
-  EXPECT_EQ(uri6.CanonicalUri(),
-      "/world/def/model/model_1/model/model_2?p=pose/pos/x");
-  EXPECT_EQ(uri6.CanonicalUri("lin_vel"),
-      "/world/def/model/model_1/model/model_2?p=lin_vel");
-
-  Uri uri7("/world/def/model/model_1");
-  parts = uri7.Parts();
-  EXPECT_EQ(parts.World(), "def");
-  entity = parts.Entity().Parent();
-  EXPECT_EQ(entity.Type(), "model");
-  EXPECT_EQ(entity.Name(), "model_1");
-  EXPECT_TRUE(parts.Parameter().empty());
-  EXPECT_EQ(uri7.CanonicalUri("pose"), "/world/def/model/model_1?p=pose");
-  EXPECT_EQ(uri7.CanonicalUri("lin_vel"), "/world/def/model/model_1?p=lin_vel");
-
-  // Invalid parameters in CanonicalUri().
-  EXPECT_THROW(uri7.CanonicalUri(" pose"), Exception);
-  EXPECT_THROW(uri7.CanonicalUri("?pose"), Exception);
-  EXPECT_THROW(uri7.CanonicalUri("=pose"), Exception);
-  EXPECT_THROW(uri7.CanonicalUri("pose&"), Exception);
-  EXPECT_THROW(uri7.CanonicalUri("?p=pose"), Exception);
+  EXPECT_THROW(URI(""), Exception);
+  EXPECT_THROW(URI("scheme"), Exception);
+  EXPECT_THROW(URI("scheme://"), Exception);
+  EXPECT_THROW(URI("scheme://?key=value"), Exception);
+  EXPECT_THROW(URI("scheme://part1?keyvalue"), Exception);
+  EXPECT_NO_THROW(URI("scheme://part1"));
+  EXPECT_NO_THROW(URI("scheme://part1/part2"));
+  EXPECT_NO_THROW(URI("scheme://part1?key=value"));
+  EXPECT_NO_THROW(URI("scheme://part1/part2?k1=v1&k2=v2"));
 }
 
 /////////////////////////////////////////////////
-TEST(UriTest, UriOtherConstructors)
+int main(int argc, char **argv)
 {
-  Uri uri1("/world/def/model/model_1?p=pose");
-  auto parts = uri1.Parts();
-  Uri uri2(parts);
-
-  // Modify uri1 to make sure uri2 is a separate copy.
-  uri1.Parts().SetWorld("modified_world");
-
-  EXPECT_EQ(uri2.Parts().World(), "def");
-  EXPECT_EQ(uri2.Parts().Entity().Parent().Name(), "model_1");
-  EXPECT_EQ(uri2.Parts().Parameter(), "pose");
-
-  // Copy constructor.
-  Uri uri3(uri2);
-
-  // Modify uri2 to make sure uri3 is a separate copy.
-  uri2.Parts().SetWorld("modified_world");
-
-  EXPECT_EQ(uri3.Parts().World(), "def");
-  EXPECT_EQ(uri3.Parts().Entity().Parent().Name(), "model_1");
-  EXPECT_EQ(uri3.Parts().Parameter(), "pose");
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
