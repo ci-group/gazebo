@@ -147,7 +147,7 @@ bool Video::Load(const std::string &_filename)
     return false;
   }
 
-  avpicture_alloc(this->pic, PIX_FMT_RGB24, this->codecCtx->width,
+  avpicture_alloc(this->pic, AV_PIX_FMT_RGB24, this->codecCtx->width,
                   this->codecCtx->height);
 
   this->swsCtx = sws_getContext(
@@ -156,7 +156,7 @@ bool Video::Load(const std::string &_filename)
       this->codecCtx->pix_fmt,
       this->codecCtx->width,
       this->codecCtx->height,
-      PIX_FMT_RGB24,
+      AV_PIX_FMT_RGB24,
       SWS_BICUBIC, NULL, NULL, NULL);
 
   if (this->swsCtx == NULL)
