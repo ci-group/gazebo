@@ -35,7 +35,8 @@ using namespace physics;
 
 //////////////////////////////////////////////////
 ODELink::ODELink(EntityPtr _parent)
-    : Link(_parent)
+    : Link(_parent),
+      hasOwnSpace(false)
 {
   this->linkId = nullptr;
 }
@@ -181,6 +182,11 @@ void ODELink::Fini()
     dBodyDestroy(this->linkId);
   this->linkId = nullptr;
 
+  if (this->spaceId && this->hasOwnSpace)
+    dSpaceDestroy(this->spaceId);
+  this->spaceId = NULL;
+  this->hasOwnSpace = false;
+
   this->odePhysics.reset();
 
   Link::Fini();
@@ -225,7 +231,11 @@ void ODELink::SetSelfCollide(bool _collide)
 {
   this->sdf->GetElement("self_collide")->Set(_collide);
   if (_collide)
-    this->spaceId = dSimpleSpaceCreate(this->odePhysics->GetSpaceId());
+  {
+    // Use method to automatically delete existing space
+    this->SetSpaceId(dSimpleSpaceCreate(this->odePhysics->GetSpaceId()));
+    this->hasOwnSpace = true;
+  }
 }
 
 //////////////////////////////////////////////////
@@ -704,6 +714,12 @@ dSpaceID ODELink::GetSpaceId() const
 //////////////////////////////////////////////////
 void ODELink::SetSpaceId(dSpaceID _spaceid)
 {
+  if (this->spaceId && this->hasOwnSpace)
+  {
+    // Destroy space which was originally created by this link
+    dSpaceDestroy(this->spaceId);
+    this->hasOwnSpace = false;
+  }
   this->spaceId = _spaceid;
 }
 
