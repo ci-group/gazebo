@@ -104,12 +104,12 @@ void Joint::Load(LinkPtr _parent, LinkPtr _child,
   if (_parent)
   {
     this->world = _parent->GetWorld();
-    this->model = _parent->GetModel();
+    this->model = ModelWeakPtr(_parent->GetModel());
   }
   else if (_child)
   {
     this->world = _child->GetWorld();
-    this->model = _child->GetModel();
+    this->model = ModelWeakPtr(_child->GetModel());
   }
   else
     gzthrow("both parent and child link do no exist");
@@ -220,16 +220,17 @@ void Joint::Load(sdf::ElementPtr _sdf)
   std::string parentName = parentElem->Get<std::string>();
   std::string childName = childElem->Get<std::string>();
 
-  if (this->model)
+  auto model_ = this->model.lock();
+  if (model_)
   {
-    this->childLink = this->model->GetLink(childName);
+    this->childLink = model_->GetLink(childName);
     if (!this->childLink)
     {
       // need to do this if child link belongs to another model
       this->childLink = boost::dynamic_pointer_cast<Link>(
           this->GetWorld()->BaseByName(childName));
     }
-    this->parentLink = this->model->GetLink(parentName);
+    this->parentLink = model_->GetLink(parentName);
   }
   else
   {
@@ -246,7 +247,7 @@ void Joint::Load(sdf::ElementPtr _sdf)
   // First try to find the link with different scopes.
   if (!this->parentLink && parentName != std::string("world"))
   {
-    BasePtr parentModel = this->model;
+    BasePtr parentModel = this->model.lock();
     while (!this->parentLink && parentModel && parentModel->HasType(MODEL))
     {
       std::string scopedParentName =
@@ -280,7 +281,7 @@ void Joint::Load(sdf::ElementPtr _sdf)
 
   if (!this->childLink && childName != std::string("world"))
   {
-    BasePtr parentModel = this->model;
+    BasePtr parentModel = this->model.lock();
 
     while (!this->childLink && parentModel && parentModel->HasType(MODEL))
     {
@@ -560,8 +561,8 @@ void Joint::Detach()
 //////////////////////////////////////////////////
 void Joint::SetModel(ModelPtr _model)
 {
-  this->model = _model;
-  this->SetWorld(this->model->GetWorld());
+  this->model = ModelWeakPtr(_model);
+  this->SetWorld(_model->GetWorld());
 }
 
 //////////////////////////////////////////////////
@@ -720,7 +721,8 @@ math::Angle Joint::GetAngle(unsigned int _index) const
 //////////////////////////////////////////////////
 double Joint::Position(const unsigned int _index) const
 {
-  if (this->model->IsStatic())
+  auto model_ = this->model.lock();
+  if (model_ && model_->IsStatic())
     return this->staticPosition;
   else
     return this->PositionImpl(_index);
@@ -785,9 +787,10 @@ math::Angle Joint::GetLowStop(unsigned int _index)
 bool Joint::SetPosition(unsigned int /*_index*/, double _position)
 {
   // parent class doesn't do much, derived classes do all the work.
-  if (this->model)
+  auto model_ = this->model.lock();
+  if (model_)
   {
-    if (this->model->IsStatic())
+    if (model_->IsStatic())
     {
       this->staticPosition = _position;
     }
@@ -1633,7 +1636,8 @@ ignition::math::Pose3d Joint::ChildLinkPose(const unsigned int _index,
   ignition::math::Vector3d anchor;
   ignition::math::Vector3d axis;
 
-  if (this->model->IsStatic())
+  auto model_ = this->model.lock();
+  if (model_->IsStatic())
   {
     /// \TODO: we want to get axis in global frame, but GlobalAxis
     /// not implemented for static models yet.

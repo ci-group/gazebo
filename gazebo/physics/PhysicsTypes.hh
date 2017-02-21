@@ -96,6 +96,10 @@ namespace gazebo
     /// \brief Boost shared pointer to a Model object
     typedef boost::shared_ptr<Model> ModelPtr;
 
+    /// \def ModelWeakPtr
+    /// \brief Boost weak pointer to a Model object
+    typedef boost::weak_ptr<Model> ModelWeakPtr;
+
     /// \def Actor
     /// \brief Boost shared pointer to an Actor object
     typedef boost::shared_ptr<Actor> ActorPtr;
@@ -119,6 +123,10 @@ namespace gazebo
     /// \def JointPtr
     /// \brief Boost shared pointer to a Joint object
     typedef boost::shared_ptr<Joint> JointPtr;
+
+    /// \def JointWeakPtr
+    /// \brief Boost weak pointer to a Joint object
+    typedef boost::weak_ptr<Joint> JointWeakPtr;
 
     /// \def JointControllerPtr
     /// \brief Boost shared pointer to a JointController object

@@ -47,7 +47,7 @@ void SimbodyJoint::Load(sdf::ElementPtr _sdf)
 {
   // store a pointer to the simbody physics engine for convenience
   this->simbodyPhysics = boost::dynamic_pointer_cast<SimbodyPhysics>(
-    this->model->GetWorld()->Physics());
+    this->model.lock()->GetWorld()->Physics());
 
   Joint::Load(_sdf);
 
@@ -127,7 +127,7 @@ void SimbodyJoint::Load(sdf::ElementPtr _sdf)
     {
       // TODO: verify
       // parent frame is at the world frame
-      X_MP = ~physics::SimbodyPhysics::Pose2Transform(this->model->WorldPose());
+      X_MP = ~physics::SimbodyPhysics::Pose2Transform(this->model.lock()->WorldPose());
     }
 
     if (this->childLink)
@@ -138,7 +138,7 @@ void SimbodyJoint::Load(sdf::ElementPtr _sdf)
     else
     {
       // TODO: verify
-      X_MC = ~physics::SimbodyPhysics::Pose2Transform(this->model->WorldPose());
+      X_MC = ~physics::SimbodyPhysics::Pose2Transform(this->model.lock()->WorldPose());
     }
 
     const SimTK::Transform X_PC = ~X_MP*X_MC;

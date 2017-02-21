@@ -542,13 +542,13 @@ void Link::UpdateWind(const common::UpdateInfo & /*_info*/)
 }
 
 /////////////////////////////////////////////////
-Joint_V Link::GetParentJoints() const
+std::vector<JointWeakPtr> Link::GetParentJoints() const
 {
   return this->parentJoints;
 }
 
 /////////////////////////////////////////////////
-Joint_V Link::GetChildJoints() const
+std::vector<JointWeakPtr> Link::GetChildJoints() const
 {
   return this->childJoints;
 }
@@ -557,12 +557,13 @@ Joint_V Link::GetChildJoints() const
 Link_V Link::GetChildJointsLinks() const
 {
   Link_V links;
-  for (std::vector<JointPtr>::const_iterator iter = this->childJoints.begin();
+  for (std::vector<JointWeakPtr>::const_iterator iter = this->childJoints.begin();
                                              iter != this->childJoints.end();
                                              ++iter)
   {
-    if ((*iter)->GetChild())
-      links.push_back((*iter)->GetChild());
+    auto childJoint_ = (*iter).lock();
+    if (childJoint_ && childJoint_->GetChild())
+      links.push_back(childJoint_->GetChild());
   }
   return links;
 }
@@ -571,12 +572,13 @@ Link_V Link::GetChildJointsLinks() const
 Link_V Link::GetParentJointsLinks() const
 {
   Link_V links;
-  for (std::vector<JointPtr>::const_iterator iter = this->parentJoints.begin();
+  for (std::vector<JointWeakPtr>::const_iterator iter = this->parentJoints.begin();
                                              iter != this->parentJoints.end();
                                              ++iter)
   {
-    if ((*iter)->GetParent())
-      links.push_back((*iter)->GetParent());
+    auto parentJoint_ = (*iter).lock();
+    if (parentJoint_ && parentJoint_->GetChild())
+      links.push_back(parentJoint_->GetParent());
   }
   return links;
 }
@@ -1011,24 +1013,25 @@ ignition::math::Matrix3d Link::WorldInertiaMatrix() const
 //////////////////////////////////////////////////
 void Link::AddParentJoint(JointPtr _joint)
 {
-  this->parentJoints.push_back(_joint);
+  this->parentJoints.push_back(JointWeakPtr(_joint));
 }
 
 //////////////////////////////////////////////////
 void Link::AddChildJoint(JointPtr _joint)
 {
-  this->childJoints.push_back(_joint);
+  this->childJoints.push_back(JointWeakPtr(_joint));
 }
 
 //////////////////////////////////////////////////
 void Link::RemoveParentJoint(const std::string &_jointName)
 {
-  for (std::vector<JointPtr>::iterator iter = this->parentJoints.begin();
-                                       iter != this->parentJoints.end();
-                                       ++iter)
+  for (auto iter = this->parentJoints.begin();
+            iter != this->parentJoints.end();
+            ++iter)
   {
     /// @todo: can we assume there are no repeats?
-    if ((*iter)->GetName() == _jointName)
+    auto parentJoint_ = (*iter).lock();
+    if (parentJoint_ && parentJoint_->GetName() == _jointName)
     {
       this->parentJoints.erase(iter);
       break;
@@ -1039,12 +1042,13 @@ void Link::RemoveParentJoint(const std::string &_jointName)
 //////////////////////////////////////////////////
 void Link::RemoveChildJoint(const std::string &_jointName)
 {
-  for (std::vector<JointPtr>::iterator iter = this->childJoints.begin();
-                                       iter != this->childJoints.end();
-                                       ++iter)
+  for (auto iter = this->childJoints.begin();
+            iter != this->childJoints.end();
+            ++iter)
   {
     /// @todo: can we assume there are no repeats?
-    if ((*iter)->GetName() == _jointName)
+    auto childJoint_ = (*iter).lock();
+    if (childJoint_ && childJoint_->GetName() == _jointName)
     {
       this->childJoints.erase(iter);
       break;
