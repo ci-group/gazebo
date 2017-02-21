@@ -61,6 +61,9 @@ void BulletCollision::OnPoseChange()
   // auto pose = this->RelativePose();
   // BulletLinkPtr bbody =
   //     boost::dynamic_pointer_cast<BulletLink>(this->parent);
+  auto p = this->parent.lock();
+  if(p)
+    BulletLinkPtr bbody = boost::dynamic_pointer_cast<BulletLink>(p);
 
   // bbody->motionState.setWorldTransform(this, pose);
 }

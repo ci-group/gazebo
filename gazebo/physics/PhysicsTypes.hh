@@ -84,6 +84,10 @@ namespace gazebo
     /// \brief Boost shared pointer to an Entity object
     typedef boost::shared_ptr<Entity> EntityPtr;
 
+    /// \def EntityWeakPtr
+    /// \brief Boost weak pointer to an Entity object
+    typedef boost::weak_ptr<Entity> EntityWeakPtr;
+
     /// \def WorldPtr
     /// \brief Boost shared pointer to a World object
     typedef boost::shared_ptr<World> WorldPtr;
@@ -199,6 +203,10 @@ namespace gazebo
     /// \def Base_V
     /// \brief Vector of BasePtr
     typedef std::vector<BasePtr> Base_V;
+
+    /// \def BaseWeakPtr
+    /// \brief Boost weak pointer to a Base object
+    typedef boost::weak_ptr<Base> BaseWeakPtr;
 
     /// \def Model_V
     /// \brief Vector of ModelPtr

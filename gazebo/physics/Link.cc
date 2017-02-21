@@ -275,10 +275,12 @@ void Link::Fini()
       msgs::Visual msg;
       msg.set_name(iter.second.name());
       msg.set_id(iter.second.id());
-      if (this->parent)
+
+      auto parent_ = this->parent.lock();
+      if (parent_)
       {
-        msg.set_parent_name(this->parent->GetScopedName());
-        msg.set_parent_id(this->parent->GetId());
+        msg.set_parent_name(parent_->GetScopedName());
+        msg.set_parent_id(parent_->GetId());
       }
       else
       {

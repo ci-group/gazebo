@@ -48,9 +48,9 @@ Base::Base(BasePtr _parent)
   this->sdf->AddAttribute("name", "string", "__default__", true);
   this->name = "__default__";
 
-  if (this->parent)
+  if (_parent)
   {
-    this->world = this->parent->GetWorld();
+    this->world = _parent->GetWorld();
   }
 }
 
@@ -73,10 +73,11 @@ void Base::Load(sdf::ElementPtr _sdf)
   else
     this->name.clear();
 
-  if (this->parent)
+  auto parent_ = this->parent.lock();
+  if (parent_)
   {
-    this->world = this->parent->GetWorld();
-    this->parent->AddChild(shared_from_this());
+    this->world = parent_->GetWorld();
+    parent_->AddChild(shared_from_this());
   }
 
   this->ComputeScopedName();
@@ -98,12 +99,12 @@ void Base::Fini()
   this->UnregisterIntrospectionItems();
 
   // Remove self as a child of the parent
-  if (this->parent)
+  auto parent_ = this->parent.lock();
+  if (parent_)
   {
-    auto temp = this->parent;
-    this->parent.reset();
+//    this->parent.reset();
 
-    temp->RemoveChild(this->id);
+    parent_->RemoveChild(this->id);
   }
 
   // Also destroy all children.
@@ -174,19 +175,20 @@ bool Base::GetSaveable() const
 //////////////////////////////////////////////////
 int Base::GetParentId() const
 {
-  return this->parent == NULL ? 0 : this->parent->GetId();
+  auto parent_ = this->parent.lock();
+  return parent_ ? 0 : parent_->GetId();
 }
 
 //////////////////////////////////////////////////
 void Base::SetParent(BasePtr _parent)
 {
-  this->parent = _parent;
+  this->parent = BaseWeakPtr(_parent);
 }
 
 //////////////////////////////////////////////////
 BasePtr Base::GetParent() const
 {
-  return this->parent;
+  return this->parent.lock();
 }
 
 //////////////////////////////////////////////////
@@ -332,7 +334,7 @@ common::URI Base::URI() const
 
   uri.SetScheme("data");
 
-  BasePtr p = this->parent;
+  BasePtr p = this->parent.lock();
   while (p)
   {
     if (p->GetParent())
@@ -370,7 +372,7 @@ void Base::UnregisterIntrospectionItems()
 //////////////////////////////////////////////////
 void Base::ComputeScopedName()
 {
-  BasePtr p = this->parent;
+  auto p = this->parent.lock();
   this->scopedName = this->GetName();
 
   while (p)

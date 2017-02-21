@@ -337,7 +337,7 @@ namespace gazebo
       protected: sdf::ElementPtr sdf;
 
       /// \brief Parent of this entity.
-      protected: BasePtr parent;
+      protected: BaseWeakPtr parent;
 
       /// \brief Children of this entity.
       protected: Base_V children;
