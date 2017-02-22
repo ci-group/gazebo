@@ -2235,7 +2235,7 @@ bool Scene::ProcessSensorMsg(ConstSensorPtr &_msg)
 }
 
 /////////////////////////////////////////////////
-bool Scene::ProcessLinkMsg(ConstLinkPtr &_msg)
+bool Scene:: ProcessLinkMsg(ConstLinkPtr &_msg)
 {
   VisualPtr linkVis;
 
@@ -2280,6 +2280,11 @@ bool Scene::ProcessLinkMsg(ConstLinkPtr &_msg)
 /////////////////////////////////////////////////
 bool Scene::ProcessJointMsg(ConstJointPtr &_msg)
 {
+  if (_msg->has_id() && this->GetVisual(_msg->id())) {
+    // Joint visual already exists
+    return true;
+  }
+
   VisualPtr childVis;
 
   if (_msg->has_child() && _msg->child() == "world")
