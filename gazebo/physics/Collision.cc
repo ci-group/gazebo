@@ -80,6 +80,7 @@ Collision::Collision(LinkPtr _link)
 Collision::~Collision()
 {
   this->Fini();
+  std::cout << "Collision destroyed" << std::endl;
 }
 
 //////////////////////////////////////////////////
