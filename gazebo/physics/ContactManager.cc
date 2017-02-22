@@ -223,7 +223,7 @@ void ContactManager::PublishContacts()
   }
 
   // publish to default topic, ~/physics/contacts
-  if (!transport::getMinimalComms())
+  if (!transport::getMinimalComms() && this->contactPub->HasConnections())
   {
     msgs::Contacts msg;
     for (unsigned int i = 0; i < this->contactIndex; ++i)
