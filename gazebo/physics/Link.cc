@@ -891,10 +891,12 @@ ModelPtr Link::GetModel() const
 //////////////////////////////////////////////////
 ignition::math::Box Link::BoundingBox() const
 {
+  // Create box with extent NULL and no contents. Upon the
+  // first sum an extent NULL box will get the contents of
+  // the box it is summed with.
   ignition::math::Box box;
 
-  box.Min().Set(ignition::math::MAX_D, ignition::math::MAX_D,
-      ignition::math::MAX_D);
+  box.Min().Set(0, 0, 0);
   box.Max().Set(0, 0, 0);
 
   for (Collision_V::const_iterator iter = this->collisions.begin();
