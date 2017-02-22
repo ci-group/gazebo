@@ -325,7 +325,8 @@ void TopicManager::ConnectSubToPub(const msgs::Publish &_pub)
 
   PublicationPtr publication = this->FindPublication(_pub.topic());
 
-  if (publication && !publication->HasTransport(_pub.host(), _pub.port()))
+  std::string remoteAddress = _pub.host() + ":" + boost::lexical_cast<std::string>(_pub.port());
+  if (publication && !publication->HasTransport(remoteAddress))
   {
     // Connect to the remote publisher
     ConnectionPtr conn = ConnectionManager::Instance()->ConnectToRemoteHost(
@@ -336,7 +337,7 @@ void TopicManager::ConnectSubToPub(const msgs::Publish &_pub)
       // Create a transport link that will read from the connection, and
       // send data to a Publication.
       PublicationTransportPtr publink(new PublicationTransport(_pub.topic(),
-            _pub.msg_type()));
+            _pub.msg_type(), remoteAddress));
 
       bool latched = false;
       SubNodeMap::iterator nodeIter = this->subscribedNodes.find(_pub.topic());
