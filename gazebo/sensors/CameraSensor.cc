@@ -186,7 +186,7 @@ void CameraSensor::Fini()
 
   if (this->camera)
   {
-    this->scene->RemoveCamera(this->ScopedName());
+    this->scene->RemoveCamera(this->camera->ScopedName());
   }
 
   this->camera.reset();
