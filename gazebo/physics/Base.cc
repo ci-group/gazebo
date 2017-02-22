@@ -98,15 +98,6 @@ void Base::Fini()
 {
   this->UnregisterIntrospectionItems();
 
-  // Remove self as a child of the parent
-  auto parent_ = this->parent.lock();
-  if (parent_)
-  {
-//    this->parent.reset();
-
-    parent_->RemoveChild(this->id);
-  }
-
   // Also destroy all children.
   while (!this->children.empty())
   {
