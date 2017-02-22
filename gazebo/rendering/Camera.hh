@@ -374,6 +374,10 @@ namespace gazebo
       /// \return The name of the camera
       public: std::string ScopedName() const;
 
+      /// \brief Get the scoped, unique name of the camera
+      /// \return The scoped unique name of the camera
+      public: std::string ScopedUniqueName() const;
+
       /// \brief Set the camera's name
       /// \param[in] _name New name for the camera
       public: void SetName(const std::string &_name);

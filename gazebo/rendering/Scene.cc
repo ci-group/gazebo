@@ -2381,6 +2381,10 @@ void Scene::ProcessRequestMsg(ConstRequestPtr &_msg)
         visPtr = this->GetVisual(_msg->data());
       }
 
+      if (!visPtr)
+        // Not located by ID, find by name
+        visPtr = this->GetVisual(_msg->data());
+
       if (visPtr)
         this->RemoveVisual(visPtr);
     }

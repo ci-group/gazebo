@@ -174,9 +174,10 @@ ScenePtr RenderEngine::CreateScene(const std::string &_name,
   {
     scene.reset(new Scene(_name, _enableVisualizations, _isServer));
   }
-  catch(...)
+  catch(const std::exception& e)
   {
-    gzerr << "Failed to instantiate a scene\n";
+    auto msg = e.what();
+    gzerr << "Failed to instantiate a scene: " << msg << "\n";
     scene.reset();
     return scene;
   }

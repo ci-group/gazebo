@@ -130,7 +130,7 @@ void CameraSensor::Init()
       }
     }
 
-    std::string scopedName = this->parentName + "::" + this->Name();
+    std::string scopedName = this->parentName + "::" + this->camera->ScopedUniqueName();
     this->camera = this->scene->CreateCamera(scopedName, false);
 
     if (!this->camera)

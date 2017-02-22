@@ -1018,6 +1018,13 @@ std::string Camera::ScopedName() const
   return this->scopedName;
 }
 
+
+//////////////////////////////////////////////////
+std::string Camera::ScopedUniqueName() const
+{
+  return this->scopedUniqueName;
+}
+
 //////////////////////////////////////////////////
 bool Camera::SaveFrame(const std::string &_filename)
 {
