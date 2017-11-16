@@ -23,9 +23,16 @@
 
 #include <boost/bind.hpp>
 #include <gazebo/gazebo_config.h>
+
 #ifdef HAVE_SPNAV
 #include <spnav.h>
-#endif
+
+#ifdef USE_X11
+// Undef a #define Status int that has been created in X11/Xlib.h
+#undef Status
+#endif //USE_X11
+
+#endif //HAVE_SPNAV
 
 #include "gazebo/gui/GuiIface.hh"
 #include "gazebo/gui/SpaceNavPrivate.hh"
