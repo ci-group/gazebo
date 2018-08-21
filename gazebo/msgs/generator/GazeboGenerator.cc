@@ -20,7 +20,9 @@
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/descriptor.pb.h>
+
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <vector>
 #include <utility>
@@ -48,7 +50,7 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
 
   // Add boost shared point include
   {
-    scoped_ptr<io::ZeroCopyOutputStream> output(
+    boost::scoped_ptr<io::ZeroCopyOutputStream> output(
         _generator_context->OpenForInsert(headerFilename, "includes"));
     io::Printer printer(output.get(), '$');
 
@@ -57,7 +59,7 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
 
   // Add boost shared point include
   {
-    scoped_ptr<io::ZeroCopyOutputStream> output(
+    boost::scoped_ptr<io::ZeroCopyOutputStream> output(
         _generator_context->OpenForInsert(sourceFilename, "includes"));
     io::Printer printer(output.get(), '$');
 
@@ -67,7 +69,7 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
 
 
   {
-    scoped_ptr<io::ZeroCopyOutputStream> output(
+    boost::scoped_ptr<io::ZeroCopyOutputStream> output(
         _generator_context->OpenForInsert(headerFilename, "includes"));
     io::Printer printer(output.get(), '$');
 
@@ -79,7 +81,7 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
 
   // Add boost shared typedef
   {
-    scoped_ptr<io::ZeroCopyOutputStream> output(
+    boost::scoped_ptr<io::ZeroCopyOutputStream> output(
         _generator_context->OpenForInsert(headerFilename, "namespace_scope"));
     io::Printer printer(output.get(), '$');
 
@@ -95,7 +97,7 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
 
   // Add const boost shared typedef
   {
-    scoped_ptr<io::ZeroCopyOutputStream> output(
+    boost::scoped_ptr<io::ZeroCopyOutputStream> output(
         _generator_context->OpenForInsert(headerFilename, "global_scope"));
     io::Printer printer(output.get(), '$');
 
@@ -111,7 +113,7 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
 
   // Add Message Factory register
   {
-    scoped_ptr<io::ZeroCopyOutputStream> output(
+    boost::scoped_ptr<io::ZeroCopyOutputStream> output(
         _generator_context->OpenForInsert(sourceFilename, "global_scope"));
     io::Printer printer(output.get(), '$');
 
