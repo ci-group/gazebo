@@ -840,7 +840,7 @@ bool StatsCommand::RunImpl()
   boost::mutex::scoped_lock lock(this->sigMutex);
   if (this->vm.count("duration"))
     this->sigCondition.timed_wait(lock,
-        boost::posix_time::seconds(this->vm["duration"].as<long>()));
+        boost::posix_time::seconds(this->vm["duration"].as<uint64_t>()));
   else
     this->sigCondition.wait(lock);
 
