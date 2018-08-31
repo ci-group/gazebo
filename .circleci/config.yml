@@ -1,0 +1,14 @@
+version: 2
+jobs:
+build:
+  machine: true
+  steps:
+    - checkout
+
+    # build the application image
+    - run: docker build -t cigroup/gazebo:$CIRCLE_BRANCH .
+
+    # deploy the image
+    - run:  |
+       docker login -u $DOCKER_USER -p $DOCKER_PASS
+       docker push cigroup/gazebo:$CIRCLE_BRANCH
