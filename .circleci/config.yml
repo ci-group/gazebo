@@ -9,17 +9,14 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
 
-      # build Docker image
-      - run: 
-          name: build
+      - run:
+          name: Build Gazebo image
           command: docker build -t cigroup/gazebo:$CIRCLE_BRANCH .
       
-      # push Docker image
       - run:
-          name: push docker image
+          name: Push Gazebo image
           command: |
             set -e
             TAG=0.1.$CIRCLE_BUILD_NUM
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker push cigroup/gazebo:$CIRCLE_BRANCH
-            docker push cigroup/gazebo:latest

@@ -1,4 +1,4 @@
-from ubuntu:xenial
+FROM ubuntu:xenial
 
 # DEPENDENCIES
 RUN apt-get update && apt-get upgrade -y
