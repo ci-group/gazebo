@@ -123,3 +123,8 @@ make -j4
 
 # INSTALL GAZEBO
 make install
+
+# Clean the Docker image from Gazebo source code
+cd /
+rm -rf /gazebo
+
