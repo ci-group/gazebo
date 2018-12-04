@@ -24,6 +24,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/scoped_ptr.hpp>
 
+#include <memory>
 #include <vector>
 #include <utility>
 #include <iostream>
@@ -50,7 +51,7 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
 
   // Add boost shared point include
   {
-    boost::scoped_ptr<io::ZeroCopyOutputStream> output(
+    std::unique_ptr<io::ZeroCopyOutputStream> output(
         _generator_context->OpenForInsert(headerFilename, "includes"));
     io::Printer printer(output.get(), '$');
 
@@ -59,7 +60,7 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
 
   // Add boost shared point include
   {
-    boost::scoped_ptr<io::ZeroCopyOutputStream> output(
+    std::unique_ptr<io::ZeroCopyOutputStream> output(
         _generator_context->OpenForInsert(sourceFilename, "includes"));
     io::Printer printer(output.get(), '$');
 
@@ -69,7 +70,7 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
 
 
   {
-    boost::scoped_ptr<io::ZeroCopyOutputStream> output(
+    std::unique_ptr<io::ZeroCopyOutputStream> output(
         _generator_context->OpenForInsert(headerFilename, "includes"));
     io::Printer printer(output.get(), '$');
 
@@ -81,7 +82,7 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
 
   // Add boost shared typedef
   {
-    boost::scoped_ptr<io::ZeroCopyOutputStream> output(
+    std::unique_ptr<io::ZeroCopyOutputStream> output(
         _generator_context->OpenForInsert(headerFilename, "namespace_scope"));
     io::Printer printer(output.get(), '$');
 
@@ -97,7 +98,7 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
 
   // Add const boost shared typedef
   {
-    boost::scoped_ptr<io::ZeroCopyOutputStream> output(
+    std::unique_ptr<io::ZeroCopyOutputStream> output(
         _generator_context->OpenForInsert(headerFilename, "global_scope"));
     io::Printer printer(output.get(), '$');
 
@@ -113,7 +114,7 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
 
   // Add Message Factory register
   {
-    boost::scoped_ptr<io::ZeroCopyOutputStream> output(
+    std::unique_ptr<io::ZeroCopyOutputStream> output(
         _generator_context->OpenForInsert(sourceFilename, "global_scope"));
     io::Printer printer(output.get(), '$');
 
