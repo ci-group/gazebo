@@ -34,7 +34,7 @@ namespace gazebo
 
     /// \class ODEModel OdeModel.hh physics/physics.hh
     /// \brief A model is a collection of links, joints, and plugins.
-    class GZ_PHYSICS_ODE_VISIBLE ODEModel : public Model
+    class GZ_PHYSICS_VISIBLE ODEModel : public Model
     {
       /// \brief Constructor.
       /// \param[in] _parent Parent object.
