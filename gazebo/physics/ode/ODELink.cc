@@ -182,14 +182,15 @@ void ODELink::Fini()
     dBodyDestroy(this->linkId);
   this->linkId = nullptr;
 
-  if (this->spaceId && this->hasOwnSpace)
-    dSpaceDestroy(this->spaceId);
-  this->spaceId = nullptr;
-  this->hasOwnSpace = false;
-
   this->odePhysics.reset();
 
   Link::Fini();
+
+  if (this->spaceId && this->hasOwnSpace)
+    // dSpaceDestroy() will crash the simulator if called before Link::Fini()
+    dSpaceDestroy(this->spaceId);
+  this->spaceId = nullptr;
+  this->hasOwnSpace = false;
 }
 
 //////////////////////////////////////////////////
