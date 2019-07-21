@@ -58,13 +58,13 @@ namespace gazebo
 
       /// \brief Node for communication.
       /// \deprecated See JointControllerPrivate::node.
-      public: transport::NodePtr gznode;
+//      public: transport::NodePtr gznode;
 
       /// \brief Subscribe to joint command.
-      public: transport::SubscriberPtr jointCmdSub;
+//      public: transport::SubscriberPtr jointCmdSub;
 
       /// \brief Node for communication.
-      public: ignition::transport::Node node;
+//      public: ignition::transport::Node node;
 
       /// \brief Last time the controller was updated.
       public: common::Time prevUpdateTime;

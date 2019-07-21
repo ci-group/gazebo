@@ -1032,7 +1032,9 @@ void dSolveLCP (dxWorldProcessContext *context, int n, dReal *A, dReal *x, dReal
         // we're going to get stuck in an infinite loop. instead, just cross
         // our fingers and exit with the current solution.
         if (s <= REAL(0.0)) {
-          dMessage (d_ERR_LCP, "LCP internal error, s <= 0 (s=%.4e)",(double)s);
+          //MATTEO: This error is annoying me and flooding the logs, since it's not actually informative of what the
+          // problem really is or how I could fix it, I'm disabling it instead
+          //dMessage (d_ERR_LCP, "LCP internal error, s <= 0 (s=%.4e)",(double)s);
           if (i < n) {
             dSetZero (x+i,n-i);
             dSetZero (w+i,n-i);

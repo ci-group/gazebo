@@ -50,19 +50,20 @@ JointController::JointController(ModelPtr _model)
   }
   boost::replace_all(modelName, "::", "/");
 
-  std::string topic = "/" + modelName + "/joint_cmd";
-  if (!this->dataPtr->node.Subscribe(topic,
-      &JointController::OnJointCommand, this))
-  {
-    gzerr << "Error subscribing to topic [" << topic << "]\n";
-  }
-
-  std::string service = "/" + modelName + "/joint_cmd_req";
-  if (!this->dataPtr->node.Advertise(service,
-      &JointController::OnJointCmdReq, this))
-  {
-    gzerr << "Error advertising service [" << service << "]\n";
-  }
+// REMOVE THIS PART BECAUSE IT CAUSES DEALOCKS FOR A USELESS FEATURE
+//  std::string topic = "/" + modelName + "/joint_cmd";
+//  if (!this->dataPtr->node.Subscribe(topic,
+//      &JointController::OnJointCommand, this))
+//  {
+//    gzerr << "Error subscribing to topic [" << topic << "]\n";
+//  }
+//
+//  std::string service = "/" + modelName + "/joint_cmd_req";
+//  if (!this->dataPtr->node.Advertise(service,
+//      &JointController::OnJointCmdReq, this))
+//  {
+//    gzerr << "Error advertising service [" << service << "]\n";
+//  }
 }
 
 /////////////////////////////////////////////////
