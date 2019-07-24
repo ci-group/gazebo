@@ -2,6 +2,7 @@
 /build/
 /build_*/
 /build-*/
+.idea/
 Ogre.log
 .DS_Store
 *.swp
