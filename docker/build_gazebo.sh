@@ -117,12 +117,12 @@ echo >tools/CMakeLists.txt 'include ( ${QT_USE_FILE} )
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE="Release" \
          -DCMAKE_INSTALL_PREFIX=/usr \
-         -DENABLE_SSE4=True \
-         -DENABLE_TESTS_COMPILATION:BOOL=False
+         -DENABLE_SSE4=True
 make -j4
 
 # INSTALL GAZEBO
 make install
+# make tests
 
 # Clean the Docker image from Gazebo source code
 cd /
