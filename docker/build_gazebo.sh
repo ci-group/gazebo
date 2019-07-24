@@ -1,35 +1,6 @@
 #!/bin/bash
 set -e
 
-# DEPENDECIES
-apt-get -y install libogre-1.9-dev                  \
-                   libbullet-dev                    \
-                   python-protobuf                  \
-                   libprotoc-dev                    \
-                   libprotobuf-dev                  \
-                   libfreeimage-dev                 \
-                   protobuf-compiler                \
-                   libboost-thread-dev              \
-                   libboost-signals-dev             \
-                   libboost-system-dev              \
-                   libboost-filesystem-dev          \
-                   libboost-program-options-dev     \
-                   libboost-regex-dev               \
-                   libboost-iostreams-dev           \
-                   freeglut3-dev                    \
-                   libcurl4-openssl-dev             \
-                   libtar-dev                       \
-                   libtbb-dev                       \
-                   libgts-dev                       \
-                   uuid-dev                         \
-                   libswscale-dev                   \
-                   libavformat-dev                  \
-                   libavcodec-dev                   \
-                   libgraphviz-dev                  \
-                   libhdf5-dev                      \
-                   libopenal-dev                    \
-                   pkg-config
-
 # DOWNLOAD GAZEBO
 cd /gazebo
 
@@ -45,6 +16,7 @@ make install
 # make tests
 
 # Clean the Docker image from Gazebo source code
+#TODO /gazebo was added with ADD, so this step doesn't really remove it from the images size.
+# it does remove the build artifacts though..
 cd /
-rm -rf /gazebo
-
+rm -rf /gazebo 
