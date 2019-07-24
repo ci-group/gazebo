@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-cd /sdformat-3.1.1
+cd /sdformat-6.0.0
 
 # BUILD SDFORMAT
 mkdir build && cd build
