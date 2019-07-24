@@ -69,13 +69,13 @@ extern "C" dMessageFunction *dGetMessageHandler()
 static void printMessage (int num, const char *msg1, const char *msg2,
 			  va_list ap)
 {
-  fflush (stderr);
-  fflush (stdout);
-  if (num) fprintf (stderr,"\n%s %d: ",msg1,num);
-  else fprintf (stderr,"\n%s: ",msg1);
-  vfprintf (stderr,msg2,ap);
-  fprintf (stderr,"\n");
-  fflush (stderr);
+//  fflush (stderr);
+//  fflush (stdout);
+//  if (num) fprintf (stderr,"\n%s %d: ",msg1,num);
+//  else fprintf (stderr,"\n%s: ",msg1);
+//  vfprintf (stderr,msg2,ap);
+//  fprintf (stderr,"\n");
+//  fflush (stderr);
 }
 
 //****************************************************************************
