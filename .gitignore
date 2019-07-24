@@ -1,5 +1,6 @@
 /test/plugins/rest-web/node_modules
 /build/
+/cmake-build-*/
 /build_*/
 /build-*/
 .idea/
