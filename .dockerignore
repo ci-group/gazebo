@@ -2,3 +2,4 @@
 /.hgignore
 /.hgreview
 /build/
+/cmake-build-*/
