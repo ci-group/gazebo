@@ -37,10 +37,10 @@ namespace gazebo
     class OpenALPrivate
     {
       /// \brief OpenAL audio context pointer.
-      public: ALCcontext_struct *context;
+      public: ALCcontext *context;
 
       /// \brief OpenAL audio device pointer.
-      public: ALCdevice_struct *audioDevice;
+      public: ALCdevice *audioDevice;
 
       /// \brief OpenAL sink pointer.
       public: OpenALSinkPtr sink;
