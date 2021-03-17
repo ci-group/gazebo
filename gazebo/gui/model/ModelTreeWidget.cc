@@ -21,6 +21,7 @@
 #include "gazebo/gui/model/ModelEditorEvents.hh"
 #include "gazebo/gui/model/ModelPluginInspector.hh"
 #include "gazebo/gui/model/ModelTreeWidget.hh"
+#include <boost/bind.hpp>
 
 using namespace gazebo;
 using namespace gui;
