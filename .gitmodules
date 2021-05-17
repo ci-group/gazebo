@@ -1,0 +1,15 @@
+[submodule "thirdparty/ign-math"]
+	path = thirdparty/ign-math
+	url = https://github.com/ignitionrobotics/ign-math.git
+[submodule "thirdparty/sdformat"]
+	path = thirdparty/sdformat
+	url = https://github.com/osrf/sdformat.git
+[submodule "thirdparty/ign-cmake"]
+	path = thirdparty/ign-cmake
+	url = https://github.com/ignitionrobotics/ign-cmake.git
+[submodule "thirdparty/ign-msgs"]
+	path = thirdparty/ign-msgs
+	url = https://github.com/ignitionrobotics/ign-msgs.git
+[submodule "thirdparty/ign-transport"]
+	path = thirdparty/ign-transport
+	url = https://github.com/ignitionrobotics/ign-transport.git
