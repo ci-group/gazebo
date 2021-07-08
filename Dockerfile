@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 # DEPENDENCIES
 RUN apt-get update && apt-get upgrade -y && apt-get install -y \

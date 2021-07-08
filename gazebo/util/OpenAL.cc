@@ -49,8 +49,8 @@ using namespace util;
 OpenAL::OpenAL()
 : dataPtr(new OpenALPrivate)
 {
-  this->dataPtr->context = NULL;
-  this->dataPtr->audioDevice = NULL;
+  this->dataPtr->context = nullptr;
+  this->dataPtr->audioDevice = nullptr;
 }
 
 /////////////////////////////////////////////////
